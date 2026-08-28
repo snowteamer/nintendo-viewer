@@ -1,0 +1,177 @@
+
+:root {
+	--accent-color: #effe4f;
+	--background-color: #1B1D32;
+	--dropdown-header-color: #595B7C;
+	--entry-color: #292C4D;
+	--input-field-color: #262739;
+
+	--dark-cell-color: gray; /* rgb(142, 134, 94); */
+	--light-cell-color: rgb(150, 142, 103);
+
+	--main-color: #3A3D58;
+	--scrollbar-color: #8483aa;
+	--toggle-button-tray: #4A4C67;
+	--trap-air-color: rgb(150, 255, 150);
+	--trap-earth-color: rgb( 90,  52,  28);
+	--trap-fire-color: rgb(185, 18, 27);
+	--trap-utility-color: rgb( 49,  45, 134);
+	--trap-water-color: rgb(64, 131, 164);
+}
+
+body {
+	display: flex;
+	flex-flow: column;
+	height: 100vh;
+	margin: 0px;
+}
+
+/*
+button {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background: silver none repeat scroll 0% 0%;
+	border: 1vh solid navy;
+    border-radius: 2vh;
+	color: mediumblue;
+	cursor: pointer;
+	font-size: min(5vh, 5vw);
+	margin: min(1vh, 1vw);
+}
+*/
+
+#counter {
+	border-right: 1px solid black;
+	font-family: Arial, Helvetica, sans-serif;
+	padding: 0 0.5em;
+}
+
+#filePicker {
+  outline: 1px solid black;
+}
+
+#main {
+	overflow: auto;
+}
+
+#ribbon {
+	background-color: lightgray;
+	color: black;
+}
+
+#ribbon > label {
+	font-family: sans-serif;
+	margin: 0 0.2em;
+}
+
+.hide-col-1 th:nth-child(1), .hide-col-1 td:nth-child(1) {
+  display: none;
+}
+
+.hide-col-2 th:nth-child(2), .hide-col-2 td:nth-child(2) {
+  display: none;
+}
+
+.hide-col-3 th:nth-child(3), .hide-col-3 td:nth-child(3) {
+  display: none;
+}
+
+.wikitable {
+	background-color: #f9f9f9;
+	border: 1px solid #aaaaaa;
+	border-collapse: collapse;
+	/* margin: 1em 0; */
+	width: 100%;
+}
+
+.wikitable > tbody {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.wikitable > thead {
+	background-color: black;
+	color: wheat;
+	position: sticky;
+	top: 0;
+}
+
+.wikitable th {
+	/* background-color: #f2f2f2; */
+	font-family: monospace;
+	font-weight: bold;
+	padding: 0.3em 0.4em;
+	text-align: center;
+}
+
+.wikitable td {
+	border: 1px solid #aaaaaa;
+	padding: 0.3em 0.4em;
+}
+
+.wikitable td.au::before {
+	content: "au";
+	font-style: italic;
+	font-variant-caps: small-caps;
+	font-weight: bold;
+	vertical-align: super;
+}
+
+.wikitable td.eu::before {
+	content: "eu";
+	font-style: italic;
+	font-variant-caps: small-caps;
+	font-weight: bold;
+	vertical-align: super;
+}
+
+.wikitable td.jp::before {
+	content: "jp";
+	font-style: italic;
+	font-variant-caps: small-caps;
+	font-weight: bold;
+	vertical-align: super;
+}
+
+.wikitable td.kr::before {
+	content: "kr";
+	font-style: italic;
+	font-variant-caps: small-caps;
+	font-weight: bold;
+	vertical-align: super;
+}
+
+.wikitable td.na::before {
+	content: "na";
+	font-style: italic;
+	font-variant-caps: small-caps;
+	font-weight: bold;
+	vertical-align: super;
+}
+
+.wikitable td.pal::before {
+	content: "pal";
+	font-style: italic;
+	font-variant-caps: small-caps;
+	font-weight: bold;
+	vertical-align: super;
+}
+
+.wikitable td.has-regions::before {
+	content: var(--regions);
+	font-style: italic;
+	font-variant-caps: small-caps;
+	font-weight: bold;
+	vertical-align: super;
+}
+
+.wikitable > tbody > tr > td:nth-child(2) {
+  font-style: italic;
+  color: blue;
+}
+
+.wikitable > tbody > tr.highlighted {
+	background-color: lightblue;
+}
+

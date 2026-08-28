@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/css/stylesheet.css" />
+    <title>Nintendo</title>
+  </head>
+  <body>
+    <div id="ribbon"></div>
+    <div id="main">
+      <table id="sheet" class="wikitable">
+        <colgroup><col id="colRegion" /><col id="colTitle" /><col id="colConsole" /></colgroup>
+      </table>
+    </div>
+  </body>
+  <script type="importmap">
+    {
+      "imports": {
+        "@me/": "/js/@me/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    window.resolve = (moduleID) => import.meta.resolve(moduleID);
+    window.updateCSS = () => {
+      document.querySelector("link").href = "/css/stylesheet.css?a=" + String(Math.random()).slice(2);
+    }
+  </script>
+  <script src="/js/3rd/read-excel-file.min.js"></script>
+
+  <script>
+
+    const main = document.getElementById("main");
+    const ribbon = document.getElementById("ribbon")
+    const tb = document.getElementById("sheet");
+    const tBody = tb.tBodies[0] ?? tb.createTBody()
+    const tHead = tb.tHead ?? tb.createTHead()
+  
+    /** Application state */
+    const columns = [
+      { name: "Région", propertyKey: "region", sortOrder: "", th: null },
+      { name: "Titre", propertyKey: "title", sortOrder: "", th: null },
+      { name: "Console", propertyKey: "console", sortOrder: "", th: null },
+      { name: "Développeur(s)", propertyKey: "developers", sortOrder: "", th: null },
+      { name: "Date", propertyKey: "releaseDate", sortOrder: "", th: null },
+    ]
+    const consoleNames = []
+    let highlightedRow = null
+    let predicate = game => ((regionsByCode[game.region]?.enabled ?? false) && (selectedConsoleName === "" || game.console === selectedConsoleName))
+    const regionCodes = ["au", "jp", "kr", "na", "pal"]
+    let selectedConsoleName = ""
+
+    tb.onclick = (event) => {
+      const { originalTarget } = event
+      let tr
+      switch (originalTarget.tagName.toLowerCase()) {
+        case "td": tr = originalTarget.parentNode; break
+        case "th": return
+        case "tr": tr = originalTarget; break
+        default: return
+      }
+      if (tr === highlightedRow) return;
+      highlightedRow?.classList.remove("highlighted");
+      highlightedRow = tr
+      highlightedRow.classList.add("highlighted");
+    }
+
+    // === Functions === //
+
+    function blink(callback, dt = 1000) {
+      return setInterval(callback, dt);
+    }
+
+    function initRows () {
+      tBody.textContent = ""
+      for (const game of Game.instances) tBody.appendChild(game.row)
+      updateCounter(Game.instances.length)
+    }
+
+    function reset () {
+      for (const region of regions) region.checkbox.checked = true
+      seConsole.selectedIndex = 0
+      for (const game of Game.instances) game.row.style.display = ""
+      updateCounter(Game.instances.length)
+    }
+
+    function sortGames (comparator) {
+      Game.instances.sort(comparator)
+      tBody.textContent = ""
+      for (const game of Game.instances) tBody.appendChild(game.row)
+    }
+
+    function sortGamesByProperty (propertyKey, reverseOrder = false) {
+      sortGames(
+        reverseOrder
+        ? (a, b) => -a[propertyKey].localeCompare(b[propertyKey])
+        : (a, b) => a[propertyKey].localeCompare(b[propertyKey])
+      )
+    }
+
+    function toggleColumnByIndex (index) {
+      tb.classList.toggle(`hide-col-${index + 1}`)
+    }
+
+    function toggleColumnByName (name) {
+      const columnNames = columns.map(c => c.name)
+      const index = columnNames.indexOf(name)
+      if (index < 0) return
+      tb.classList.toggle(`hide-col-${index + 1}`)
+    }
+
+    function updateColumns () {
+      const gamePropertyKeys = columns.map(c => c.propertyKey)
+      try { Game.updateColumns(gamePropertyKeys) } catch (err) { console.error(err.message) }
+      const tr = tHead.querySelector("tr") ?? tHead.insertRow()
+      tr.textContent = ""
+      for (const column of columns) {
+        const th = document.createElement("th")
+        th.textContent = column.name
+        tr.appendChild(th)
+        column.th = th
+        // Makes the column sortable by clicking on its header.
+        th.onclick = (event) => {
+          const { propertyKey, sortOrder } = column
+          if (sortOrder === "A") {
+            sortGamesByProperty(propertyKey, true)
+            column.sortOrder = "D"
+          } else {
+            sortGamesByProperty(propertyKey);
+            column.sortOrder = "A"
+          }
+        }
+      }
+    }
+
+    function updateConsoles () {
+      consoleNames.length = 0
+      consoleNames.push(...new Set(Game.instances.map(g => g.console).sort()))
+      // View
+      seConsole.options.length = 1 // Keeps only the "Toutes" option.
+      for (const consoleName of consoleNames) {
+        seConsole.appendChild(
+          Object.assign(document.createElement("option"), { text: consoleName, value: consoleName })
+        )
+      }
+    }
+
+    function updateCounter (numVisibleRows) {
+      spCounter.textContent = `${numVisibleRows} / ${Game.instances.length}`
+    }
+
+    function updatePredicate () {
+      let numVisibleRows = 0
+      for (const game of Game.instances) {
+        if (predicate(game)) {
+          numVisibleRows++
+          game.row.style.display = ""
+        } else {
+          game.row.style.display = "none"
+        }
+      }
+      updateCounter(numVisibleRows)
+    }
+
+    function useCustomDateFormat () {
+      const columnIndex = columns.findIndex(c => c.propertyKey === "releaseDate")
+      if (columnIndex < 0) return
+      const months = ["janv.", "févr.", "mars", "avr.", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
+      let datestring = ""
+      for (const game of Game.instances) {
+        const { releaseDate } = game
+        if (releaseDate === "TBA") datestring = "TBA"
+        else {
+          const [year, month = "", day = ""] = releaseDate.split("-")
+          if (year && month && day) datestring = `${day}/${month}/${year}`
+          else if (year && month) datestring = `${months[Number(month) - 1]}-${year}`
+          else datestring = year
+        }
+        game.row.cells[columnIndex].textContent = datestring
+      }
+    }
+
+    function useIsoDateFormat () {
+      const columnIndex = columns.findIndex(c => c.propertyKey === "releaseDate")
+      if (columnIndex < 0) return
+      for (const game of Game.instances) {
+        game.row.cells[columnIndex].textContent = game.releaseDate
+      }
+    }
+
+    // === Generated elements === //
+
+    const filePicker = Object.assign(document.createElement("input"), {
+      id: "filePicker",
+      type: "file",
+      async onchange (event) {
+        const file = event.target.files[0]
+        await Game.loadFile(file)
+        updateColumns()
+        initRows()
+        updateConsoles()
+      }
+    })
+
+    const regions = regionCodes.map(code => ({ code, enabled: true }))
+
+    for (const region of regions) {
+      const { code } = region
+      region.checkbox = Object.assign(document.createElement("input"), {
+        type: "checkbox",
+        id: `cbRegion${code.toUpperCase()}`,
+        checked: true,
+        onchange (event) {
+          region.enabled = event.target.checked
+          updatePredicate()
+        }
+      })  
+      region.label = Object.assign(document.createElement("label"), {
+        id: `lblRegion${code.toUpperCase()}`,
+      })
+      region.label.append(region.checkbox, new Text(code.toUpperCase()))
+    }
+    const regionsByCode = regions.reduce((acc, region) => (acc[region.code] = region, acc), {})
+
+    const btnRegionALL = Object.assign(document.createElement("button"), {
+      id: "btnRegionALL",
+      onclick (event) {
+        regions.forEach(region => { region.checkbox.checked = true; region.enabled = true })
+        updatePredicate()
+      },
+      textContent: "Tout"
+    })
+
+    const btnRegionNONE = Object.assign(document.createElement("button"), {
+      id: "btnRegionNONE",
+      onclick (event) {
+        regions.forEach(region => { region.checkbox.checked = false; region.enabled = false })
+        updatePredicate()
+      },
+      textContent: "Rien"
+    })
+
+    const seConsole = document.createElement("select")
+    seConsole.add(Object.assign(new Option("Toutes consoles", "", true)))
+    seConsole.onchange = function (event) {
+      selectedConsoleName = seConsole.value
+      updatePredicate()
+    }
+
+    const spCounter = Object.assign(document.createElement("span"), {
+      id: "counter",
+      textContent: `0 / 0`
+    })
+    /* Ribbon initialization */
+    ribbon.append(filePicker, spCounter, ...regions.map(r => r.label), btnRegionALL, btnRegionNONE, seConsole)
+
+    ;(async () => {
+      /* Asynchronous imports */
+      window.utils = await import("@me/utils.js")
+      window.Game = await utils.importModule("@me/Game.js")
+    })();
+  </script>
+</html>
