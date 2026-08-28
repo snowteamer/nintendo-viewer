@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/css/stylesheet.css" />
+    <link rel="stylesheet" href="./css/stylesheet.css" />
     <title>Nintendo</title>
   </head>
   <body>
@@ -17,7 +17,7 @@
   <script type="importmap">
     {
       "imports": {
-        "@me/": "/js/@me/"
+        "@me/": "./js/@me/"
       }
     }
   </script>
@@ -25,10 +25,10 @@
   <script type="module">
     window.resolve = (moduleID) => import.meta.resolve(moduleID);
     window.updateCSS = () => {
-      document.querySelector("link").href = "/css/stylesheet.css?a=" + String(Math.random()).slice(2);
+      document.querySelector("link").href = "./css/stylesheet.css?a=" + String(Math.random()).slice(2);
     }
   </script>
-  <script src="/js/3rd/read-excel-file.min.js"></script>
+  <script src="./js/3rd/read-excel-file.min.js"></script>
 
   <script>
 
@@ -45,6 +45,7 @@
       { name: "Console", propertyKey: "console", sortOrder: "", th: null },
       { name: "Développeur(s)", propertyKey: "developers", sortOrder: "", th: null },
       { name: "Date", propertyKey: "releaseDate", sortOrder: "", th: null },
+      { name: "Note", propertyKey: "note", sortOrder: "", th: null },
     ]
     const consoleNames = []
     let highlightedRow = null
@@ -167,7 +168,7 @@
     function useCustomDateFormat () {
       const columnIndex = columns.findIndex(c => c.propertyKey === "releaseDate")
       if (columnIndex < 0) return
-      const months = ["janv.", "févr.", "mars", "avr.", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
+      const months = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
       let datestring = ""
       for (const game of Game.instances) {
         const { releaseDate } = game
