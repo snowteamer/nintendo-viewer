@@ -12,6 +12,14 @@ Je sais seulement comment faire en langage du web...
 /**@typedef {string} isostring - ISO 8601 string, possibly truncated to month or day precision. */
 /**@typedef {(0 | 1 | 2)} completionStatus - ISO 8601 string, possibly truncated to month or day precision. */
 
+function parseDateColumn (arg) {
+    switch (typeof arg) {
+        case "object": return arg.getFullYear()
+        case "string": return arg
+        default: return arg
+    }
+}
+
 const throwNewError = (/**@type string */ msg) => { throw new Error(msg) }
 
 const CompletionStatus = Object.freeze({
@@ -98,7 +106,7 @@ export default class Game {
         jan: "01", fév: "02", mar: "03", avr: "04", mai: "05", juin: "06",
         juil: "07", aoû: "08", sep: "09", oct: "10", nov: "11", déc: "12"
     }
-    static propertyKeys = ["region", "title", "console", "developers", "releaseDate"]
+    static propertyKeys = ["region", "title", "console", "developers", "releaseDate", "note"]
     static regionMap = {
         "America": Region.na,
         "Australia": Region.au,
@@ -166,14 +174,17 @@ export default class Game {
             const region = Game.regionMap[longRegionName] ?? throwNewError(`Unknown long region name: "${longRegionName}"`)
             const rowIterator = rows.values()
             // Skips the first row.
-            rowIterator.next()
+            const columnNames = rowIterator.next().value ?? []
+            if (!columnNames.length) continue;
+            const hasRawDateColumn = columnNames.includes("Raw Date")
+            // TODO: make this configurable via a schema.
             for (const [title, consoleID, _releaseDate, developers, note, rawDate] of rowIterator) {
                 try {
                     new Game(String(title), consoleID, {
                         developers: developers?.split(", ") ?? [],
                         note: note ?? "",
                         region,
-                        releaseDate: Game.normalizeDateString(rawDate),
+                        releaseDate: (hasRawDateColumn && rawDate) ? Game.normalizeDateString(rawDate) : parseDateColumn(_releaseDate),
                     })
                 } catch (err) {
                     console.error({ region, title, consoleID, _releaseDate, developers, note, rawDate })
@@ -224,5 +235,9 @@ export default class Game {
         if (game) for (const key of propertyKeys) if (!(key in game)) throwNewError(`Unknown game property: "${key}"`)
         Game.propertyKeys = propertyKeys
         for (const game of Game.instances) game.updateRow()
+    }
+
+    static *yieldPropertyValues (/**@type string */ propertyKey) {
+        for (const game of Game.instances) yield game[propertyKey]
     }
 }
