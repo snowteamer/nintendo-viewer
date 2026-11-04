@@ -1,26 +1,16 @@
-/**
-C'est possible en stockant les dates au format `[année]-[mois]-[jour]` pour ça, ça permet de les garder triables par ordre chronologique même si le jour et/ou le mois sont absents
-
-Mais ensuite pour que ces dates s'affichent sans inclure un faux 1er janvier ou 31 décembre alors qu'on en sait rien, je ne sais pas comment faire sur un tableur, 
-Je sais seulement comment faire en langage du web...
-
-> Mon rêve ce serait que par défaut, 100% des jeux tour statut confondu, toute console confondue se mettent ensemble pour former un seul grand tableau
-ça va faire un grand tableau ça... une intégration Google Sheets risque de freeze le navigateur, à moins peut-être de découper ce grand tableau en pages pas trop grandes chacune
-
-*/
-
 /**@typedef {string} isostring - ISO 8601 string, possibly truncated to month or day precision. */
 /**@typedef {(0 | 1 | 2)} completionStatus - ISO 8601 string, possibly truncated to month or day precision. */
 
-function parseDateColumn (arg) {
+import Region from "@me/Region.js";
+import { throwNewError } from "@me/utils.js";
+
+function parseDateColumn (/**@type unknown */ arg) {
     switch (typeof arg) {
         case "object": return arg.getFullYear()
         case "string": return arg
         default: return arg
     }
 }
-
-const throwNewError = (/**@type string */ msg) => { throw new Error(msg) }
 
 const CompletionStatus = Object.freeze({
     NONE: 0,
@@ -81,8 +71,12 @@ const Console = Object.freeze({
     wiiVC: { all: "Wii Virtual Console" },
 })
 
-const Region = Object.freeze({
-    au: "au", jp: "jp", kr: "kr", na: "na", pal: "pal"
+
+const GameType = Object.freeze({
+    CLONE: "Clone",
+    CONVERSION: "Conversion",
+    ORIGINAL_GAME: "Jeu original",
+    REMASTER: "Remaster",
 })
 
 /*
@@ -92,6 +86,22 @@ const monthMap = {
 };
 */
 
+const inputSchema = {
+    "console": { type: String, oneOf: Object.values(Console) },
+    "developers": { type: [String] },
+    "digital": { type: Boolean },
+    "editors": { type: [String] },
+    "licensors": { type: [String] },
+    "lineage": { type: String },
+    "note": { type: String },
+    "region": { type: Region },
+    "releaseDate": { type: Date },
+    "title": { type: String },
+    "type": { type: String, oneOf: Object.values(GameType) },
+    "transcription": { type: String }
+}
+
+const INCONNU = "Inconnu"
 const TBA = "TBA"
 
 export default class Game {
@@ -101,35 +111,36 @@ export default class Game {
     static instancesByID = new Map()
     /**@type Map<string, Game[]> */
     static instancesByTitle = new Map()
-    
+
+    /**@type Record<string, string> */
     static monthMap = {
         jan: "01", fév: "02", mar: "03", avr: "04", mai: "05", juin: "06",
         juil: "07", aoû: "08", sep: "09", oct: "10", nov: "11", déc: "12"
     }
-    static propertyKeys = ["region", "title", "console", "developers", "releaseDate", "note"]
-    static regionMap = {
-        "America": Region.na,
-        "Australia": Region.au,
-        "Europe": Region.pal,
-        "Japan": Region.jp,
-        "Korea": Region.kr,
-    }
+    static propertyKeys = ["region", "title", "console", "digital", "developers", "editors", "licencors", "releaseDate", "lineage", "type", "note"]
 
     completionStatus = CompletionStatus.NONE
     console = ""
 
     /**@type string[] */
     developers = []
+    /**@type string[] */
+    editors = []
 
     get id () { return `${this.title}_${this.console}_${this.region}` }
     /**@type string[] */
     licensors = []
+    // Aka. Série
+    lineage = ""
 
     note = ""
+    /**@type string[] */
     refs = []
     region = ""
     releaseDate = ""
     title = ""
+    transcription = ""
+    type = ""
 
     /**@type HTMLTableRowElement */
     row = document.createElement("tr")
@@ -143,13 +154,19 @@ export default class Game {
         Game.instancesByTitle.get(title)?.push(this) ?? Game.instancesByTitle.set(title, [this])
     }
 
+    // TODO: use a schema to know whether to render property values as text or HTML.
     updateRow () {
       const { row } = this
       if (row.cells.length) row.textContent = ""
       for (const key of Game.propertyKeys) {
         const td = row.insertCell()
         const value = this[key]
-        td.textContent = Array.isArray(value) ? value.join(", ") : value
+        if (key === "title" && value.startsWith("<ruby")) {
+            td.innerHTML = value
+            if (this.transcription) td.title = this.transcription
+        } else {
+            td.textContent = Array.isArray(value) ? value.join(", ") : value
+        }
       }
     }
 
@@ -171,7 +188,7 @@ export default class Game {
                 continue
             }
             const longRegionName = name.slice("Nintendo of ".length)
-            const region = Game.regionMap[longRegionName] ?? throwNewError(`Unknown long region name: "${longRegionName}"`)
+            const region = Region.byName(longRegionName)
             const rowIterator = rows.values()
             // Skips the first row.
             const columnNames = rowIterator.next().value ?? []
@@ -189,6 +206,80 @@ export default class Game {
                 } catch (err) {
                     console.error({ region, title, consoleID, _releaseDate, developers, note, rawDate })
                     console.error(err)
+                }
+            }
+        }
+        console.log(`Done loading file "${file.name}" in ${Date.now() - t0}ms`)
+    }
+
+    // In thie version, every regions has four dedicated columns:
+    // for title, physical release date, digital release date and editor(s).
+    static async loadFileV2 (/**@type File */ file) {
+        console.debug("Loading file:", file)
+        const t0 = Date.now()
+        /**@type { { sheet: string; data: unknown[][] }[] } */
+        const sheets = await readXlsxFile(file)
+        for (const { sheet: name, data: rows } of sheets) {
+            console.log("Loading sheet \"%s\" (%d rows)", name, rows.length);
+            const rowIterator = rows.values()
+            // Skips the first row.
+            const columnNames = rowIterator.next().value ?? []
+            if (!columnNames.length) continue;
+            // ["Titre JP", "Titre NA", "Titre EU", "Date JP Phys", "Date NA Phys", "Date EU Phys", "Date JP Dig", "Date NA Dig", "Date EU Dig", "Console", "Type", "Développeur", "Editeur jp", "Editeur NA", "Editeur EU", "Licensors", "Série", "Note"]
+            // TODO: make this configurable via a schema.
+            for (const [
+                titleJP, transcription, titleNA, titleEU,
+                physicalReleaseDateJP, physicalReleaseDateNA, physicalReleaseDateEU,
+                digitalReleaseDateJP, digitalReleaseDateNA, digitalReleaseDateEU,
+                consoleID, type, developers,
+                editorsJP, editorsNA, editorsEU,
+                licensors, lineage, note,
+            ] of rowIterator) {
+                let title = "", digital = false, editors, digitalReleaseDate, physicalReleaseDate
+                for (const region of ["jp", "na", "eu"]) {
+                    switch (region) {
+                        case "eu": {
+                            title = titleEU; editors = editorsEU; digitalReleaseDate = digitalReleaseDateEU; physicalReleaseDate = physicalReleaseDateEU;
+                            break
+                        }
+                        case "jp": {
+                            title = titleJP; editors = editorsJP; digitalReleaseDate = digitalReleaseDateJP; physicalReleaseDate = physicalReleaseDateJP;
+                            break
+                        }
+                        case "na": {
+                            title = titleNA; editors = editorsNA; digitalReleaseDate = digitalReleaseDateNA; physicalReleaseDate = physicalReleaseDateNA;
+                            break
+                        }
+                    }
+                    if (title) {
+                        if (!editors) console.warn("Missing editors for game:", title);
+                        if (!physicalReleaseDate && !digitalReleaseDate) console.warn("Missing physical or digital release date for game:", title);
+                    }
+                    try {
+                        const gameCtorOptions = {
+                            developers: developers?.split(", ") ?? [],
+                            editors: editors?.split(", ") ?? [],
+                            licensors: licensors?.split(", ") ?? [],
+                            lineage: lineage ?? "",
+                            note: note ?? "",
+                            region,
+                            transcription,
+                            type,
+                        }
+                        if (physicalReleaseDate) {
+                            gameCtorOptions.digital = false
+                            gameCtorOptions.releaseDate = parseDateColumn(physicalReleaseDate)
+                            new Game(String(title), consoleID, gameCtorOptions)
+                        }
+                        if (digitalReleaseDate) {
+                            gameCtorOptions.digital = true
+                            gameCtorOptions.releaseDate = parseDateColumn(digitalReleaseDate)
+                            new Game(String(title), consoleID, gameCtorOptions)
+                        }
+                    } catch (err) {
+                        console.error(gameCtorOptions)
+                        console.error(err)
+                    }
                 }
             }
         }
@@ -228,6 +319,13 @@ export default class Game {
             
         }
         yield* Game.instances.filter(predicate)
+    }
+
+    static unload () {
+        for (const { row } of this.instances) row.textContent = ""
+        this.instances.length = 0
+        this.instancesByID.clear()
+        this.instancesByTitle.clear()
     }
 
     static updateColumns (/**@type string[] */ propertyKeys) {

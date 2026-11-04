@@ -1,18 +1,26 @@
 {
     "name": "@me/nintendo",
+    "compilerOptions": {
+        "checkJs": true,
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "lib": ["DOM", "esnext"],
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strict": true
+    },
     "exports": "./app.ts",
     "imports": {
         "~/": "./",
-        "fmt/": "https://deno.land/std@0.138.0/fmt/",
-        "path": "https://deno.land/std@0.138.0/path/mod.ts",
-        "pogo": "https://github.com/snowteamer/pogo/raw/native-http/main.ts",
-        "pogo/": "https://github.com/snowteamer/pogo/raw/native-http/",
-        "@me/": "file:///home/snow/Saya/Codebase/JavaScript/@me/",
-        "@me/snowdash": "file:///home/snow/Saya/Codebase/JavaScript/@me/snowdash/index.js",
-        "@me/snowdash/": "file:///home/snow/Codebase/JavaScript/@me/snowdash/"
+        "@me/": "./js/@me/"
+    },
+    "lint": {
+        "rules": {
+            "exclude": ["ban-ts-comment", "no-window"]
+        }
     },
     "nodeModulesDir": "manual",
     "tasks": {
-        "run": "deno run --allow-net=:8000 --allow-env=PORT --allow-read=../../../Books,../,./,./libs --allow-write=./data --no-check app.ts"
+        "run": "python -m http.server -b localhost 8000"
     }
 }

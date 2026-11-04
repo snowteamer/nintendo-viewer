@@ -43,14 +43,18 @@
       { name: "Région", propertyKey: "region", sortOrder: "", th: null },
       { name: "Titre", propertyKey: "title", sortOrder: "", th: null },
       { name: "Console", propertyKey: "console", sortOrder: "", th: null },
+      { name: "Digital", propertyKey: "digital", sortOrder: "", th: null },
       { name: "Développeur(s)", propertyKey: "developers", sortOrder: "", th: null },
+      { name: "Éditeur(s)", propertyKey: "editors", sortOrder: "", th: null },
+      { name: "Licenseur(s)", propertyKey: "licensors", sortOrder: "", th: null },
       { name: "Date", propertyKey: "releaseDate", sortOrder: "", th: null },
-      { name: "Note", propertyKey: "note", sortOrder: "", th: null },
+      { name: "Série", propertyKey: "lineage", sortOrder: "", th: null },
+      { name: "Type", propertyKey: "type", sortOrder: "", th: null },
+      // { name: "Note", propertyKey: "note", sortOrder: "", th: null },
     ]
     const consoleNames = []
     let highlightedRow = null
-    let predicate = game => ((regionsByCode[game.region]?.enabled ?? false) && (selectedConsoleName === "" || game.console === selectedConsoleName))
-    const regionCodes = ["au", "jp", "kr", "na", "pal"]
+    let predicate = game => ((Region.instancesByCode[game.region]?.enabled ?? false) && (selectedConsoleName === "" || game.console === selectedConsoleName))
     let selectedConsoleName = ""
 
     tb.onclick = (event) => {
@@ -72,6 +76,15 @@
 
     function blink(callback, dt = 1000) {
       return setInterval(callback, dt);
+    }
+
+    function createTooltipReference (text) {
+      const sup = document.createElement("sup")
+      sup.textContent = text
+      sup.className = "citation-link"
+      sup.onmouseenter = (event) => { rt.hide(); rt.show(sup.getBoundingClientRect()) }
+      sup.onmouseleave = (event) => rt.hide()
+      return sup
     }
 
     function initRows () {
@@ -112,6 +125,11 @@
       tb.classList.toggle(`hide-col-${index + 1}`)
     }
 
+    function unload () {
+      tBody.textContent = ""
+      Game.unload()
+    }
+  
     function updateColumns () {
       const gamePropertyKeys = columns.map(c => c.propertyKey)
       try { Game.updateColumns(gamePropertyKeys) } catch (err) { console.error(err.message) }
@@ -198,32 +216,13 @@
       type: "file",
       async onchange (event) {
         const file = event.target.files[0]
-        await Game.loadFile(file)
+        Game.instances.length = 0
+        await Game.loadFileV2(file)
         updateColumns()
         initRows()
         updateConsoles()
       }
     })
-
-    const regions = regionCodes.map(code => ({ code, enabled: true }))
-
-    for (const region of regions) {
-      const { code } = region
-      region.checkbox = Object.assign(document.createElement("input"), {
-        type: "checkbox",
-        id: `cbRegion${code.toUpperCase()}`,
-        checked: true,
-        onchange (event) {
-          region.enabled = event.target.checked
-          updatePredicate()
-        }
-      })  
-      region.label = Object.assign(document.createElement("label"), {
-        id: `lblRegion${code.toUpperCase()}`,
-      })
-      region.label.append(region.checkbox, new Text(code.toUpperCase()))
-    }
-    const regionsByCode = regions.reduce((acc, region) => (acc[region.code] = region, acc), {})
 
     const btnRegionALL = Object.assign(document.createElement("button"), {
       id: "btnRegionALL",
@@ -254,13 +253,17 @@
       id: "counter",
       textContent: `0 / 0`
     })
-    /* Ribbon initialization */
-    ribbon.append(filePicker, spCounter, ...regions.map(r => r.label), btnRegionALL, btnRegionNONE, seConsole)
 
     ;(async () => {
       /* Asynchronous imports */
       window.utils = await import("@me/utils.js")
       window.Game = await utils.importModule("@me/Game.js")
+      window.Region = await utils.importModule("@me/Region.js")
+      window.ReferenceTooltip = await utils.importModule("@me/ReferenceTooltip.js")
+      window.regions = Region.instances
+      window.rt = new ReferenceTooltip()
+      /* Ribbon initialization */
+      ribbon.append(filePicker, spCounter, ...regions.map(r => r.label), btnRegionALL, btnRegionNONE, seConsole)
     })();
   </script>
 </html>

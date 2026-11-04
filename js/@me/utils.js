@@ -18,6 +18,8 @@ export const resolve = (/**@type string */ moduleID) => {
   return import.meta.resolve(moduleID);
 }
 
+export const throwNewError = (/**@type string */ msg) => { throw new Error(msg) }
+
 export const updateClass = async (/**@type Function */ Ctor, basePath = "") => {
   // @ts-ignore
   let url = Ctor.importMetaURL ?? basePath + "/" + Ctor.name + ".js";
@@ -47,7 +49,7 @@ export const updateClass = async (/**@type Function */ Ctor, basePath = "") => {
       continue;
     }
     if ("value" in desc && typeof desc.value !== "function") {
-      if (["length", "name", "importMetaURL", "prototype"].includes(name)) continue;
+      if (["length", "name", "prototype"].includes(name)) continue;
       if (desc.writable === false) {
         console.warn("[updateClass] Cannot update non-writable property %s", name);
         continue;

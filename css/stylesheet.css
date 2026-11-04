@@ -1,24 +1,4 @@
 
-:root {
-	--accent-color: #effe4f;
-	--background-color: #1B1D32;
-	--dropdown-header-color: #595B7C;
-	--entry-color: #292C4D;
-	--input-field-color: #262739;
-
-	--dark-cell-color: gray; /* rgb(142, 134, 94); */
-	--light-cell-color: rgb(150, 142, 103);
-
-	--main-color: #3A3D58;
-	--scrollbar-color: #8483aa;
-	--toggle-button-tray: #4A4C67;
-	--trap-air-color: rgb(150, 255, 150);
-	--trap-earth-color: rgb( 90,  52,  28);
-	--trap-fire-color: rgb(185, 18, 27);
-	--trap-utility-color: rgb( 49,  45, 134);
-	--trap-water-color: rgb(64, 131, 164);
-}
-
 body {
 	display: flex;
 	flex-flow: column;
@@ -26,21 +6,13 @@ body {
 	margin: 0px;
 }
 
-/*
-button {
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	background: silver none repeat scroll 0% 0%;
-	border: 1vh solid navy;
-    border-radius: 2vh;
-	color: mediumblue;
-	cursor: pointer;
-	font-size: min(5vh, 5vw);
-	margin: min(1vh, 1vw);
+ruby {
+	text-transform: full-size-kana;
 }
-*/
+
+ruby[data-dessous] {
+	ruby-position: under;
+}
 
 #counter {
 	border-right: 1px solid black;
@@ -175,3 +147,31 @@ button {
 	background-color: lightblue;
 }
 
+/* Styling for the [1] links */
+.wikitable *.citation-link {
+  color: #36b;
+  text-decoration: none;
+  font-size: 0.8em;
+  vertical-align: super;
+  margin-left: 2px;
+}
+
+.wikitable *.citation-link:hover {
+  text-decoration: underline;
+}
+
+.reference-tooltip {
+  position: absolute;
+  background: #ffffff;
+  border: 1px solid #a2a9b1;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #202122;
+  font-size: 14px;
+  max-width: 250px;
+  padding: 8px 12px;
+  pointer-events: none; /* Prevents the tooltip from flickering if the mouse hits it */
+  transition: opacity 0.15s ease;
+  transform: translate(-50%, -100%);
+  z-index: 2;
+}

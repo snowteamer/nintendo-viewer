@@ -62,31 +62,5 @@
     "https://raw.githubusercontent.com/snowteamer/pogo/native-http/lib/types.ts": "38bd53e7143996d70af9a4b73ca1e4d8058dc7ef8cc2e72026b10ba60c3b1a7d",
     "https://raw.githubusercontent.com/snowteamer/pogo/native-http/lib/util/is-path-inside.ts": "1f04a7873076c27410fa6cc1320f33c415ee5870c10f9465b13db0119c541bd4",
     "https://raw.githubusercontent.com/snowteamer/pogo/native-http/lib/util/read-dir-stats.ts": "0335af669825065c74ead2dbdc5fce40acc9630d4e20250241eb9e0e80a46d89"
-  },
-  "workspace": {
-    "links": {
-      "jsr:@me/backend": {},
-      "jsr:@me/dom": {},
-      "jsr:@me/french": {},
-      "jsr:@me/listing": {},
-      "jsr:@me/pegs": {},
-      "jsr:@me/pubsub": {},
-      "jsr:@me/snowdash": {},
-      "jsr:@me/traversal": {},
-      "jsr:@me/utils": {},
-      "npm:@me/environment": {},
-      "npm:@me/french": {},
-      "npm:@me/listing": {},
-      "npm:@me/nlp@1.0.0": {},
-      "npm:@me/nodejs/io@1.0.0": {},
-      "npm:@me/traversal": {
-        "dependencies": [
-          "npm:snowdash@1"
-        ]
-      },
-      "npm:@me/utils": {},
-      "npm:@snowtech/pegs": {},
-      "npm:snowdash@1.0.0": {}
-    }
   }
 }
