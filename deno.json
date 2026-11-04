@@ -16,7 +16,7 @@
     },
     "lint": {
         "rules": {
-            "exclude": ["ban-ts-comment", "no-window"]
+            "exclude": ["ban-ts-comment", "no-this-alias", "no-window"]
         }
     },
     "nodeModulesDir": "manual",

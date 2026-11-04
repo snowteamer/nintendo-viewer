@@ -20,7 +20,7 @@ export const resolve = (/**@type string */ moduleID) => {
 
 export const throwNewError = (/**@type string */ msg) => { throw new Error(msg) }
 
-export const updateClass = async (/**@type Function */ Ctor, basePath = "") => {
+export const updateClass = async (/**@type Function */ Ctor, basePath = "@me/js") => {
   // @ts-ignore
   let url = Ctor.importMetaURL ?? basePath + "/" + Ctor.name + ".js";
   console.debug("url:", url)

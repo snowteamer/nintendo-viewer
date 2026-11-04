@@ -124,6 +124,7 @@ export default class Game {
 
     /**@type string[] */
     developers = []
+    digital = false
     /**@type string[] */
     editors = []
 
@@ -163,10 +164,10 @@ export default class Game {
         const value = this[key]
         if (key === "title" && value.startsWith("<ruby")) {
             td.innerHTML = value
-            if (this.transcription) td.title = this.transcription
         } else {
             td.textContent = Array.isArray(value) ? value.join(", ") : value
         }
+        if (key === "title" && this.transcription) td.title = this.transcription
       }
     }
 
@@ -313,14 +314,7 @@ export default class Game {
         }
     }
 
-    static *query (props = {}) {
-        const { completionStatus, console, developers, licensors, region, releaseDate, title, } = props
-        const predicate = (/**@type Game */ game) => {
-            
-        }
-        yield* Game.instances.filter(predicate)
-    }
-
+    // Unload all instances.
     static unload () {
         for (const { row } of this.instances) row.textContent = ""
         this.instances.length = 0

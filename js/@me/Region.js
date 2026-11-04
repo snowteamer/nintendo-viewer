@@ -1,4 +1,5 @@
 import { throwNewError } from "@me/utils.js";
+import UI from "@me/UI.js";
 
 export default class Region {
     /**@type Region[] */
@@ -14,11 +15,11 @@ export default class Region {
     /**@type Region? */
     parent = null
 
-    /**@type HTMLInputElement? */
-    checkbox = null
+    /**@type HTMLInputElement */
+    checkbox
     emoji = ""
-    /**@type HTMLLabelElement? */
-    label = null
+    /**@type HTMLLabelElement */
+    label
 
     constructor (/**@type string */ name, /**@type string */ code, { hasEmoji = false }) {
         this.name = name
@@ -27,10 +28,48 @@ export default class Region {
         Region.instances.push(this)
         Region.instancesByCode[code] = this
         Region.instancesByName[name] = this
+        // Requires 'code' to be set.
+        this.checkbox = this.createCheckbox()
+        this.label = this.createLabel()
+        this.label.append(this.checkbox, new Text(this.code.toUpperCase()))
+    }
+
+    static byCode (/**@type string */ code) {
+        return Region.instancesByCode[code] ?? throwNewError(`Unknown region code: "${code}"`)
     }
 
     static byName (/**@type string */ name) {
         return Region.instancesByName[name] ?? throwNewError(`Unknown region name: "${name}"`)
+    }
+
+    static load () {
+        ;/**@type [string, string, { hasEmoji: boolean }][] */ ([
+            ["Australia", "au", { hasEmoji: true }],
+            ["Europe", "eu", { hasEmoji: true }],
+            ["Japan", "jp", { hasEmoji: true }],
+            ["Korea", "kr", { hasEmoji: true }],
+            ["America", "na", { hasEmoji: false }],
+        ]).forEach(args => new Region(...args))
+    }
+
+    createCheckbox () {
+        const region = this
+        return Object.assign(document.createElement("input"), {
+            type: "checkbox",
+            id: `cbRegion${region.code.toUpperCase()}`,
+            checked: true,
+            onchange () {
+                region.enabled = this.checked
+                UI.instance?.updatePredicate()
+            }
+        })
+    }
+
+    createLabel () {
+        const region = this
+        return Object.assign(document.createElement("label"), {
+            id: `lblRegion${region.code.toUpperCase()}`,
+        })
     }
 
     // Source - https://stackoverflow.com/a/44070554
@@ -49,34 +88,3 @@ export default class Region {
     }
 }
 
-;/**@type [string, string, { hasEmoji: boolean }][] */ ([
-    ["Australia", "au", { useEmoji: true }],
-    ["Europe", "eu", { hasEmoji: true }],
-    ["Japan", "jp", { hasEmoji: true }],
-    ["Korea", "kr", { hasEmoji: true }],
-    ["America", "na", { hasEmoji: false }],
-]).forEach(args => new Region(...args))
-
-function createCheckboxForRegion (/**@type Region */ region) {
-    return Object.assign(document.createElement("input"), {
-        type: "checkbox",
-        id: `cbRegion${region.code.toUpperCase()}`,
-        checked: true,
-        onchange (/**@type Event */ event) {
-            // @ts-ignore
-            region.enabled = event.target.checked
-        }
-    })
-}
-
-function createLabelForRegion (/**@type Region */ region) {
-    return Object.assign(document.createElement("label"), {
-        id: `lblRegion${region.code.toUpperCase()}`,
-    })
-}
-
-for (const region of Region.instances) {
-    region.checkbox = createCheckboxForRegion(region)
-    region.label = createLabelForRegion(region)
-    region.label.append(region.checkbox, new Text(region.code.toUpperCase()))
-}
