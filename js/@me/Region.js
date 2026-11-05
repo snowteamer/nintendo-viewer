@@ -32,6 +32,7 @@ export default class Region {
         this.checkbox = this.createCheckbox()
         this.label = this.createLabel()
         this.label.append(this.checkbox, new Text(this.code.toUpperCase()))
+        this.label.title = name
     }
 
     static byCode (/**@type string */ code) {

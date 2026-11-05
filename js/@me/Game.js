@@ -6,7 +6,7 @@ import { throwNewError } from "@me/utils.js";
 
 function parseDateColumn (/**@type unknown */ arg) {
     switch (typeof arg) {
-        case "object": return arg.getFullYear()
+        case "object": return arg === null ? "" : String(arg.getFullYear())
         case "string": return arg
         default: return arg
     }

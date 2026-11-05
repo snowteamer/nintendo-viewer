@@ -274,6 +274,11 @@ export default class UI {
       const region = Region.byCode(code)
       game.row.cells[columnIndex].textContent = region.emoji || region.code
     }
+    for (const region of Region.instances) {
+      if (region.checkbox.nextSibling instanceof Text) {
+        region.checkbox.nextSibling.data = (region.emoji || region.code.toLocaleUpperCase())
+      }
+    }
   }
 
   useIsoDateFormat () {
@@ -289,6 +294,11 @@ export default class UI {
     if (columnIndex < 0) return
     for (const game of Game.instances) {
       game.row.cells[columnIndex].textContent = game.region
+    }
+    for (const region of Region.instances) {
+      if (region.checkbox.nextSibling instanceof Text) {
+        region.checkbox.nextSibling.data = region.code.toLocaleUpperCase()
+      }
     }
   }
 }
