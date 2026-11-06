@@ -32,6 +32,13 @@ export default class UI {
   options = {
     ui: this,
 
+    _alignCenter: false,
+    get alignCenter () { return this._alignCenter },
+    set alignCenter (bool) {
+      this._alignCenter = bool
+      tBody.style.textAlign = bool ? "center" : ""
+    },
+  
     _useCustomDateFormat: false,
     get useCustomDateFormat () { return this._useCustomDateFormat },
     set useCustomDateFormat (bool) {
@@ -94,17 +101,31 @@ export default class UI {
     this.btnUnload = Object.assign(document.createElement("button"), {
       id: "btnUnload",
       onclick () { ui.unload() },
-      textContent: "Vider"
+      textContent: "Vider",
+      title: "Vider tout le tableau"
+    })
+
+    this.cbAlignCENTER = Object.assign(document.createElement("input"), {
+      type: "checkbox",
+      checked: false,
+      onchange () { ui.options.alignCenter = this.checked }
     })
 
     this.cbUseEmojiFlags = Object.assign(document.createElement("input"), {
-        type: "checkbox",
-        checked: false,
-        onchange () { ui.options.useEmojiRegionFlags = this.checked }
+      type: "checkbox",
+      checked: false,
+      onchange () { ui.options.useEmojiRegionFlags = this.checked }
     })
 
+    this.lblAlignCenter = Object.assign(document.createElement("label"), {
+      id: "lblAlignCenter",
+      title: "Centrer les colonnes"
+    })
+    this.lblAlignCenter.append(this.cbAlignCENTER, new Text("Centrer"))
+
     this.lblUseEmojiFlags = Object.assign(document.createElement("label"), {
-        id: "lblUseEmojiFlags",
+      id: "lblUseEmojiFlags",
+      title: "Utiliser des drapeaux pour les régions"
     })
     this.lblUseEmojiFlags.append(this.cbUseEmojiFlags, new Text("Drapeaux"))
 
@@ -269,6 +290,7 @@ export default class UI {
   useEmojiRegionFlags () {
     const columnIndex = this.columnDefinitions.findIndex(c => c.propertyKey === "region")
     if (columnIndex < 0) return
+    tBody.classList.add("use-emoji-flags")
     for (const game of Game.instances) {
       const { region: code } = game
       const region = Region.byCode(code)
@@ -292,6 +314,7 @@ export default class UI {
   usePlainTextRegionFlags () {
     const columnIndex = this.columnDefinitions.findIndex(c => c.propertyKey === "region")
     if (columnIndex < 0) return
+    tBody.classList.remove("use-emoji-flags")
     for (const game of Game.instances) {
       game.row.cells[columnIndex].textContent = game.region
     }

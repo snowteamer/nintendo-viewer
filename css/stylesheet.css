@@ -21,7 +21,7 @@ ruby[data-dessous] {
 }
 
 #filePicker {
-  outline: 1px solid black;
+	outline: 1px solid black;
 }
 
 #main {
@@ -36,18 +36,24 @@ ruby[data-dessous] {
 #ribbon > label {
 	font-family: sans-serif;
 	margin: 0 0.2em;
+	user-select: none;
 }
 
 .hide-col-1 th:nth-child(1), .hide-col-1 td:nth-child(1) {
-  display: none;
+	display: none;
 }
 
 .hide-col-2 th:nth-child(2), .hide-col-2 td:nth-child(2) {
-  display: none;
+	display: none;
 }
 
 .hide-col-3 th:nth-child(3), .hide-col-3 td:nth-child(3) {
-  display: none;
+	display: none;
+}
+
+.use-emoji-flags td:nth-child(1) {
+	text-shadow: black 1px 1px 2px;
+	font-size: 2em;
 }
 
 .wikitable {
@@ -67,6 +73,7 @@ ruby[data-dessous] {
 	color: wheat;
 	position: sticky;
 	top: 0;
+	user-select: none;
 }
 
 .wikitable th {
@@ -80,6 +87,7 @@ ruby[data-dessous] {
 .wikitable td {
 	border: 1px solid #aaaaaa;
 	padding: 0.3em 0.4em;
+	text-wrap: balance;
 }
 
 .wikitable td.au::before {
@@ -139,8 +147,8 @@ ruby[data-dessous] {
 }
 
 .wikitable > tbody > tr > td:nth-child(2) {
-  font-style: italic;
-  color: blue;
+	font-style: italic;
+	color: blue;
 }
 
 .wikitable > tbody > tr.highlighted {
@@ -149,29 +157,29 @@ ruby[data-dessous] {
 
 /* Styling for the [1] links */
 .wikitable *.citation-link {
-  color: #36b;
-  text-decoration: none;
-  font-size: 0.8em;
-  vertical-align: super;
-  margin-left: 2px;
+	color: #36b;
+	text-decoration: none;
+	font-size: 0.8em;
+	vertical-align: super;
+	margin-left: 2px;
 }
 
 .wikitable *.citation-link:hover {
-  text-decoration: underline;
+	text-decoration: underline;
 }
 
 .reference-tooltip {
-  position: absolute;
-  background: #ffffff;
-  border: 1px solid #a2a9b1;
-  border-radius: 2px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  color: #202122;
-  font-size: 14px;
-  max-width: 250px;
-  padding: 8px 12px;
-  pointer-events: none; /* Prevents the tooltip from flickering if the mouse hits it */
-  transition: opacity 0.15s ease;
-  transform: translate(-50%, -100%);
-  z-index: 2;
+	position: absolute;
+	background: #ffffff;
+	border: 1px solid #a2a9b1;
+	border-radius: 2px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	color: #202122;
+	font-size: 14px;
+	max-width: 250px;
+	padding: 8px 12px;
+	pointer-events: none; /* Prevents the tooltip from flickering if the mouse hits it */
+	transition: opacity 0.15s ease;
+	transform: translate(-50%, -100%);
+	z-index: 2;
 }
