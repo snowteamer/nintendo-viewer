@@ -1,5 +1,23 @@
 import * as tc from "@me/tc.js";
 
+export const createCheckbox = (/**@type Partial<HTMLInputElement> */ props = {}) => {
+  const rv = document.createElement("input")
+  Object.assign(rv,    
+    { type: "checkbox" },
+    props,
+  )
+  return rv
+}
+
+export const createLabelForCheckbox = (
+  /**@type HTMLInputElement */ cb,
+  { text = "", /**@type Partial<HTMLLabelElement> */ props = {} } = {}
+) => {
+  const label = Object.assign(document.createElement("label"), props)
+  label.append(cb, new Text(text))
+  return label
+}
+
 export const importModule = async (/**@type string */ urlOrPath) => {
   const exports = await import(urlOrPath)
   return exports["default"] ?? exports

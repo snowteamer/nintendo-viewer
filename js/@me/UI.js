@@ -1,5 +1,5 @@
 import { tb, tBody, tHead } from "@me/dom.js"
-import { throwNewError } from "@me/utils.js";
+import { createCheckbox, createLabelForCheckbox, throwNewError } from "@me/utils.js";
 import Game from "@me/Game.js"
 import ReferenceTooltip from "@me/ReferenceTooltip.js";
 import Region from "@me/Region.js";
@@ -38,7 +38,15 @@ export default class UI {
       this._alignCenter = bool
       tBody.style.textAlign = bool ? "center" : ""
     },
-  
+
+    _useCompactMode: false,
+    get useCompactMode () { return this._useCompactMode },
+    set useCompactMode (bool) {
+      this._useCompactMode = bool
+      if (bool) tb.classList.add("compact")
+      else tb.classList.remove("compact")
+    },
+
     _useCustomDateFormat: false,
     get useCustomDateFormat () { return this._useCustomDateFormat },
     set useCustomDateFormat (bool) {
@@ -55,7 +63,8 @@ export default class UI {
   }
 
   predicate = (/**@type Game */ game) => (
-    (Region.instancesByCode[game.region]?.enabled ?? false) && (this.selectedConsoleName === "" || game.console === this.selectedConsoleName)
+    (Region.instancesByCode[game.region]?.enabled ?? false)
+    && (this.selectedConsoleName === "" || game.console === this.selectedConsoleName)
   )
 
   rt = new ReferenceTooltip()
@@ -73,7 +82,7 @@ export default class UI {
         const file = ui.filePicker.files?.[0]
         if (!file) return
         Game.instances.length = 0
-        await Game.loadFileV2(file)
+        await Game.loadFile(file)
         ui.updateColumns()
         ui.initRows()
         ui.updateConsoles()
@@ -105,35 +114,44 @@ export default class UI {
       title: "Vider tout le tableau"
     })
 
-    this.cbAlignCENTER = Object.assign(document.createElement("input"), {
-      type: "checkbox",
-      checked: false,
-      onchange () { ui.options.alignCenter = this.checked }
+    this.cbAlignCENTER = createCheckbox({
+      onchange () { ui.options.alignCenter = /**@type HTMLInputElement */ (this).checked }
     })
 
-    this.cbUseEmojiFlags = Object.assign(document.createElement("input"), {
-      type: "checkbox",
-      checked: false,
-      onchange () { ui.options.useEmojiRegionFlags = this.checked }
+    this.cbUseCompactMode = createCheckbox({
+      onchange () { ui.options.useCompactMode = /**@type HTMLInputElement */ (this).checked }
     })
 
-    this.lblAlignCenter = Object.assign(document.createElement("label"), {
-      id: "lblAlignCenter",
-      title: "Centrer les colonnes"
+    this.cbUseEmojiFlags = createCheckbox({
+      onchange () { ui.options.useEmojiRegionFlags = /**@type HTMLInputElement */ (this).checked }
     })
-    this.lblAlignCenter.append(this.cbAlignCENTER, new Text("Centrer"))
 
-    this.lblUseEmojiFlags = Object.assign(document.createElement("label"), {
-      id: "lblUseEmojiFlags",
-      title: "Utiliser des drapeaux pour les régions"
+    this.lblAlignCenter = createLabelForCheckbox(this.cbAlignCENTER, {
+      text: "Centrer",
+      props: {
+        title: "Centrer les colonnes"
+      }
     })
-    this.lblUseEmojiFlags.append(this.cbUseEmojiFlags, new Text("Drapeaux"))
+
+    this.lblUseCompactMode = createLabelForCheckbox(this.cbUseCompactMode, {
+      text: "Mode compact",
+    })
+
+    this.lblUseEmojiFlags = createLabelForCheckbox(this.cbUseEmojiFlags, {
+      text: "Drapeaux",
+      props: {
+        title: "Utiliser des drapeaux pour les régions"
+      }
+    })
 
     this.seConsole = document.createElement("select")
     this.seConsole.add(Object.assign(new Option("Toutes consoles", "", true)))
     this.seConsole.onchange = function () {
       ui.selectedConsoleName = ui.seConsole.value
       ui.updatePredicate()
+      // TODO: use colgroups instead.
+      if (ui.selectedConsoleName) tb.classList.add("hide-col-3")
+      else tb.classList.remove("hide-col-3")
     }
 
     this.spCounter = Object.assign(document.createElement("span"), {
@@ -192,8 +210,8 @@ export default class UI {
   sortGamesByProperty (/**@type keyof Game */ propertyKey, reverseOrder = false) {
     this.sortGames(
       reverseOrder
-      ? (a, b) => -a[propertyKey].localeCompare(b[propertyKey])
-      : (a, b) => a[propertyKey].localeCompare(b[propertyKey])
+      ? (a, b) => -String(a[propertyKey]).localeCompare(String(b[propertyKey]))
+      : (a, b) => String(a[propertyKey]).localeCompare(String(b[propertyKey]))
     )
   }
 

@@ -1,3 +1,4 @@
+/**@typedef {keyof Game} GamePropertyKey */
 /**@typedef {string} isostring - ISO 8601 string, possibly truncated to month or day precision. */
 /**@typedef {(0 | 1 | 2)} completionStatus - ISO 8601 string, possibly truncated to month or day precision. */
 
@@ -6,7 +7,15 @@ import { throwNewError } from "@me/utils.js";
 
 function parseDateColumn (/**@type unknown */ arg) {
     switch (typeof arg) {
-        case "object": return arg === null ? "" : String(arg.getFullYear())
+        case "number": return String(arg)
+        case "object": {
+            if (arg === null) return ""
+            if (arg instanceof Date) {
+                console.warn("Imprecise Date found - limiting precision to year only.")
+                return String(arg.getFullYear())
+            }
+            return ""
+        }
         case "string": return arg
         default: return arg
     }
@@ -117,7 +126,10 @@ export default class Game {
         jan: "01", fév: "02", mar: "03", avr: "04", mai: "05", juin: "06",
         juil: "07", aoû: "08", sep: "09", oct: "10", nov: "11", déc: "12"
     }
-    static propertyKeys = ["region", "title", "console", "digital", "developers", "editors", "licencors", "releaseDate", "lineage", "type", "note"]
+    /**@type GamePropertyKey[] */
+    static propertyKeys = ["region", "fullTitle", "console", "digital", "developers", "editors", "licensors", "releaseDate", "lineage", "type", "note"]
+    // Used in 'Game.unrubyTitle()'.
+    static td = document.createElement("td")
 
     completionStatus = CompletionStatus.NONE
     console = ""
@@ -127,6 +139,9 @@ export default class Game {
     digital = false
     /**@type string[] */
     editors = []
+    // May include HTML <ruby> annotations.
+    // TODO: store this another way, without HTML.
+    fullTitle = ""
 
     get id () { return `${this.title}_${this.console}_${this.region}` }
     /**@type string[] */
@@ -139,6 +154,7 @@ export default class Game {
     refs = []
     region = ""
     releaseDate = ""
+    // Title without ruby annotations.
     title = ""
     transcription = ""
     type = ""
@@ -146,28 +162,29 @@ export default class Game {
     /**@type HTMLTableRowElement */
     row = document.createElement("tr")
 
-    constructor (/**@type string */ title, /**@type string */ console, data = {}) {
-        this.title = title || throwNewError("Missing arg: 'title'")
+    constructor (/**@type string */ fullTitle, /**@type string */ console, data = {}) {
+        this.fullTitle = fullTitle || throwNewError("Missing arg: 'fullTitle'")
         this.console = console || throwNewError("Missing arg: 'console'")
+        this.title = Game.unrubyTitle(fullTitle)
         Object.assign(this, data)
         Game.instances.push(this)
         Game.instancesByID.set(this.id, this)
-        Game.instancesByTitle.get(title)?.push(this) ?? Game.instancesByTitle.set(title, [this])
+        Game.instancesByTitle.get(this.title)?.push(this) ?? Game.instancesByTitle.set(this.title, [this])
     }
 
     // TODO: use a schema to know whether to render property values as text or HTML.
     updateRow () {
-      const { row } = this
+      const { row, transcription } = this
       if (row.cells.length) row.textContent = ""
       for (const key of Game.propertyKeys) {
         const td = row.insertCell()
         const value = this[key]
-        if (key === "title" && value.startsWith("<ruby")) {
-            td.innerHTML = value
+        if (key === "fullTitle" && String(value).includes("<ruby")) {
+            td.innerHTML = String(value)
         } else {
-            td.textContent = Array.isArray(value) ? value.join(", ") : value
+            td.textContent = Array.isArray(value) ? value.join(", ") : String(value)
         }
-        if (key === "title" && this.transcription) td.title = this.transcription
+        if ((key === "fullTitle" || key === "title") && transcription) td.title = transcription
       }
     }
 
@@ -178,44 +195,20 @@ export default class Game {
         return Game.instancesByTitle.get(title)
     }
 
-    static async loadFile (/**@type File */ file) {
-        console.debug("Loading file:", file)
-        const t0 = Date.now()
-        /**@type { { sheet: string; data: unknown[][] }[] } */
-        const sheets = await readXlsxFile(file)
-        for (const { sheet: name, data: rows } of sheets) {
-            if (!name.startsWith("Nintendo of ")) {
-                console.warn("Unrecognizable sheet name:", name);
-                continue
-            }
-            const longRegionName = name.slice("Nintendo of ".length)
-            const region = Region.byName(longRegionName)
-            const rowIterator = rows.values()
-            // Skips the first row.
-            const columnNames = rowIterator.next().value ?? []
-            if (!columnNames.length) continue;
-            const hasRawDateColumn = columnNames.includes("Raw Date")
-            // TODO: make this configurable via a schema.
-            for (const [title, consoleID, _releaseDate, developers, note, rawDate] of rowIterator) {
-                try {
-                    new Game(String(title), consoleID, {
-                        developers: developers?.split(", ") ?? [],
-                        note: note ?? "",
-                        region,
-                        releaseDate: (hasRawDateColumn && rawDate) ? Game.normalizeDateString(rawDate) : parseDateColumn(_releaseDate),
-                    })
-                } catch (err) {
-                    console.error({ region, title, consoleID, _releaseDate, developers, note, rawDate })
-                    console.error(err)
-                }
-            }
+    static groupBy (/**@type GamePropertyKey[] */ ...propertyKeys) {
+        /**@type Map<string, Game[]> */
+        const map = new Map()
+        for (const game of Game.instances) {
+            const nUplet = propertyKeys.map((/**@type GamePropertyKey */ propertyKey) => game[propertyKey]).join("_")
+            map.get(nUplet)?.push(game) ?? map.set(nUplet, [game])
         }
-        console.log(`Done loading file "${file.name}" in ${Date.now() - t0}ms`)
+        return map
     }
 
     // In thie version, every regions has four dedicated columns:
     // for title, physical release date, digital release date and editor(s).
-    static async loadFileV2 (/**@type File */ file) {
+    // One row for every distinct title/console/region combination.
+    static async loadFile (/**@type File */ file) {
         console.debug("Loading file:", file)
         const t0 = Date.now()
         /**@type { { sheet: string; data: unknown[][] }[] } */
@@ -237,7 +230,7 @@ export default class Game {
                 licensors, lineage, note,
             ] of rowIterator) {
                 let title = "", digital = false, editors, digitalReleaseDate, physicalReleaseDate
-                for (const region of ["jp", "na", "eu"]) {
+                for (const region of ["eu", "jp", "us-ca"]) {
                     switch (region) {
                         case "eu": {
                             title = titleEU; editors = editorsEU; digitalReleaseDate = digitalReleaseDateEU; physicalReleaseDate = physicalReleaseDateEU;
@@ -247,7 +240,7 @@ export default class Game {
                             title = titleJP; editors = editorsJP; digitalReleaseDate = digitalReleaseDateJP; physicalReleaseDate = physicalReleaseDateJP;
                             break
                         }
-                        case "na": {
+                        case "us-ca": {
                             title = titleNA; editors = editorsNA; digitalReleaseDate = digitalReleaseDateNA; physicalReleaseDate = physicalReleaseDateNA;
                             break
                         }
@@ -278,8 +271,14 @@ export default class Game {
                             new Game(String(title), consoleID, gameCtorOptions)
                         }
                     } catch (err) {
-                        console.error(gameCtorOptions)
-                        console.error(err)
+                        console.error(err, [
+                            titleJP, transcription, titleNA, titleEU,
+                            physicalReleaseDateJP, physicalReleaseDateNA, physicalReleaseDateEU,
+                            digitalReleaseDateJP, digitalReleaseDateNA, digitalReleaseDateEU,
+                            consoleID, type, developers,
+                            editorsJP, editorsNA, editorsEU,
+                            licensors, lineage, note,
+                        ])
                     }
                 }
             }
@@ -322,14 +321,35 @@ export default class Game {
         this.instancesByTitle.clear()
     }
 
-    static updateColumns (/**@type string[] */ propertyKeys) {
+    // TODO: avoid the HTML injection.
+    static unrubyTitle (/**@type string */ fullTitle) {
+        if (!fullTitle.includes("<ruby")) return fullTitle
+        Game.td.innerHTML = fullTitle
+        // For safety.
+        if (Game.td.querySelector("script")) throwNewError("Found forbidden tag in provided 'fullTitle'!")
+        const parts = []
+        for (const node of Game.td.childNodes) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                parts[parts.length] = /**@type Text */ (node).data
+            } else if (node instanceof Element && node.tagName.toLowerCase() === "ruby") {
+                for (const innerNode of node.childNodes) {
+                    if (innerNode.nodeType === Node.TEXT_NODE) {
+                        parts[parts.length] = /**@type Text */ (innerNode).data
+                    }
+                }
+            }
+        }
+        return parts.join("").trimEnd()
+    }
+
+    static updateColumns (/**@type GamePropertyKey[] */ propertyKeys) {
         const game = Game.instances[0]
         if (game) for (const key of propertyKeys) if (!(key in game)) throwNewError(`Unknown game property: "${key}"`)
         Game.propertyKeys = propertyKeys
         for (const game of Game.instances) game.updateRow()
     }
 
-    static *yieldPropertyValues (/**@type string */ propertyKey) {
+    static *yieldPropertyValues (/**@type GamePropertyKey */ propertyKey) {
         for (const game of Game.instances) yield game[propertyKey]
     }
 }
