@@ -1,3 +1,6 @@
+:root {
+	--highlight-color: lightblue;
+}
 
 body {
 	display: flex;
@@ -45,6 +48,40 @@ ruby[data-dessous] {
 	user-select: none;
 }
 
+.has-regional-prefix::before {
+	content: var(--regions);
+	font-style: italic;
+	font-variant-caps: small-caps;
+	font-weight: bold;
+	margin-right: 2px;
+	vertical-align: super;
+}
+
+/* For use with images */
+
+.has-regional-prefix-image::before {
+	--emoji-image: none;
+	content: '';
+	display: inline-block;
+	background-image: var(--emoji-image); /* url(../webp/us-ca.webp); */
+	background-repeat: no-repeat;
+	background-size: cover;
+	box-shadow: black 1px 1px 2px;
+	height: 1em;
+	margin-bottom: 1px;
+	margin-right: 2px;
+	vertical-align: super;
+	width: 2em;
+}
+
+.has-regional-suffix::after {
+	content: var(--regions);
+	font-style: italic;
+	font-variant-caps: small-caps;
+	font-weight: bold;
+	vertical-align: super;
+}
+
 .hide-col-1 th:nth-child(1), .hide-col-1 td:nth-child(1) {
 	display: none;
 }
@@ -82,6 +119,10 @@ ruby[data-dessous] {
 	width: 100%;
 }
 
+.wikitable > colgroup > col.highlighted {
+	background-color: var(--highlight-color);
+}
+
 .wikitable > tbody {
 	font-family: Arial, Helvetica, sans-serif;
 }
@@ -102,6 +143,14 @@ ruby[data-dessous] {
 	text-align: center;
 }
 
+.wikitable th.sortable {
+    cursor: pointer;
+    padding-right: 21px; /* Make room for the arrow icon */
+    background-image: url("../svg/sort_both.svg");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+}
+
 .wikitable td {
 	border: 1px solid #aaaaaa;
 	padding: 0.3em 0.4em;
@@ -112,69 +161,13 @@ ruby[data-dessous] {
 	padding: 0;
 }
 
-.wikitable td.au::before {
-	content: "au";
-	font-style: italic;
-	font-variant-caps: small-caps;
-	font-weight: bold;
-	vertical-align: super;
-}
-
-.wikitable td.eu::before {
-	content: "eu";
-	font-style: italic;
-	font-variant-caps: small-caps;
-	font-weight: bold;
-	vertical-align: super;
-}
-
-.wikitable td.jp::before {
-	content: "jp";
-	font-style: italic;
-	font-variant-caps: small-caps;
-	font-weight: bold;
-	vertical-align: super;
-}
-
-.wikitable td.kr::before {
-	content: "kr";
-	font-style: italic;
-	font-variant-caps: small-caps;
-	font-weight: bold;
-	vertical-align: super;
-}
-
-.wikitable td.na::before {
-	content: "na";
-	font-style: italic;
-	font-variant-caps: small-caps;
-	font-weight: bold;
-	vertical-align: super;
-}
-
-.wikitable td.pal::before {
-	content: "pal";
-	font-style: italic;
-	font-variant-caps: small-caps;
-	font-weight: bold;
-	vertical-align: super;
-}
-
-.wikitable td.has-regions::before {
-	content: var(--regions);
-	font-style: italic;
-	font-variant-caps: small-caps;
-	font-weight: bold;
-	vertical-align: super;
-}
-
 .wikitable > tbody > tr > td:nth-child(2) {
 	font-style: italic;
 	color: blue;
 }
 
 .wikitable > tbody > tr.highlighted {
-	background-color: lightblue;
+	background-color: var(--highlight-color)
 }
 
 /* Styling for the [1] links */
@@ -204,4 +197,35 @@ ruby[data-dessous] {
 	transition: opacity 0.15s ease;
 	transform: translate(-50%, -100%);
 	z-index: 2;
+}
+
+/* Wikipedia-like Table Styling */
+.wikitable2 {
+    background-color: #f8f9fa;
+    color: #202122;
+    margin: 1em 0;
+    border: 1px solid #a2a9b1;
+    border-collapse: collapse;
+    font-family: sans-serif;
+    font-size: 85%; /* Wikipedia uses a slightly smaller text size for tables */
+}
+
+/* Table headers and cells */
+.wikitable2 th, 
+.wikitable2 td {
+    border: 1px solid #a2a9b1;
+    padding: 0.4em 0.7em;
+}
+
+/* Header specific styling */
+.wikitable2 th {
+    background-color: #eaecf0;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Optional: Caption styling if you use <caption> */
+.wikitable2 caption {
+    font-weight: bold;
+    padding: 0.5em;
 }

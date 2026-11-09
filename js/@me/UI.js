@@ -1,66 +1,101 @@
 import { tb, tBody, tHead } from "@me/dom.js"
 import { createCheckbox, createLabelForCheckbox, throwNewError } from "@me/utils.js";
+import Column from "@me/Column.js";
 import Game from "@me/Game.js"
 import ReferenceTooltip from "@me/ReferenceTooltip.js";
 import Region from "@me/Region.js";
+import { throwNewAssertionError } from "@me/tc.js";
+
+
 
 export default class UI {
   /**@type UI? */
   static instance = null
 
-  /**@type { { name: string, propertyKey: keyof Game, sortOrder: string, th: HTMLTableCellElement? }[] } */
+  /**@type ColumnDefinition[] */
   columnDefinitions = [
-    { name: "Région", propertyKey: "region", sortOrder: "", th: null },
-    { name: "Titre", propertyKey: "title", sortOrder: "", th: null },
-    { name: "Console", propertyKey: "console", sortOrder: "", th: null },
-    { name: "Digital", propertyKey: "digital", sortOrder: "", th: null },
-    { name: "Développeur(s)", propertyKey: "developers", sortOrder: "", th: null },
-    { name: "Éditeur(s)", propertyKey: "editors", sortOrder: "", th: null },
-    { name: "Licenseur(s)", propertyKey: "licensors", sortOrder: "", th: null },
-    { name: "Date", propertyKey: "releaseDate", sortOrder: "", th: null },
-    { name: "Série", propertyKey: "lineage", sortOrder: "", th: null },
-    { name: "Type", propertyKey: "type", sortOrder: "", th: null },
-    // { name: "Note", propertyKey: "note", sortOrder: "", th: null },
+    { name: "Région", propertyKey: "region" },
+    { name: "Titre", propertyKey: "title" },
+    { name: "Console", propertyKey: "console" },
+    { name: "Digital", propertyKey: "digital" },
+    { name: "Développeur(s)", propertyKey: "developers" },
+    { name: "Éditeur(s)", propertyKey: "editors" },
+    { name: "Licenseur(s)", propertyKey: "licensors" },
+    { name: "Date", propertyKey: "releaseDate" },
+    { name: "Série", propertyKey: "lineage" },
+    { name: "Type", propertyKey: "type", },
+    // { name: "Note", propertyKey: "note" },
   ]
+
+  /**@type Column[] */
+  columns = this.columnDefinitions.map(definition => new Column(definition))
+
+  /**@type Map<string, Column> */
+  columnsByName = new Map(this.columns.map(column => [column.name, column]))
+  /**@type Map<string, Column> */
+  columnsByPropertyKey = new Map(this.columns.map(column => [column.propertyKey, column]))
+
+  /**@type Record<keyof UI["_options"], (this: UI, arg: boolean) => void> */
+  static optionHandlers = {
+    alignCenter (bool) {
+      tBody.style.textAlign = bool ? "center" : ""
+    },
+    useCompactMode (bool) {
+      if (bool) tb.classList.add("compact"); else tb.classList.remove("compact")
+    },
+    useCustomDateFormat (bool) {
+      bool ? this.useCustomDateFormat() : this.useIsoDateFormat()
+    },
+    useEmojiRegionFlags (bool) {
+      bool ? this.useEmojiRegionFlags() : this.usePlainTextRegionFlags()
+    },
+    useRegionalPrefixes (bool) {
+      const ui = this
+      const index = this.columns.findIndex(c => c.propertyKey === "title")
+      if (bool) {
+        ui.hideColumnByName("Région")
+        for (const game of Game.instances) {
+          window.setRegionalPrefix(game.row.cells[index], game.region)
+        }
+      } else {
+        ui.showColumnByName("Région")
+        for (const game of Game.instances) {
+          window.unsetRegionalPrefix(game.row.cells[index])
+        }
+      }
+    }
+  }
 
   /**@type string[] */
   consoleNames = []
 
+  /**@type HTMLTableColElement? */
+  highlightedCol = null
   /**@type HTMLTableRowElement? */
   highlightedRow = null
 
-  options = {
-    ui: this,
-
-    _alignCenter: false,
-    get alignCenter () { return this._alignCenter },
-    set alignCenter (bool) {
-      this._alignCenter = bool
-      tBody.style.textAlign = bool ? "center" : ""
-    },
-
-    _useCompactMode: false,
-    get useCompactMode () { return this._useCompactMode },
-    set useCompactMode (bool) {
-      this._useCompactMode = bool
-      if (bool) tb.classList.add("compact")
-      else tb.classList.remove("compact")
-    },
-
-    _useCustomDateFormat: false,
-    get useCustomDateFormat () { return this._useCustomDateFormat },
-    set useCustomDateFormat (bool) {
-      this._useCustomDateFormat = bool
-      bool ? this.ui.useCustomDateFormat() : this.ui.useIsoDateFormat()
-    },
-
-    _useEmojiRegionFlags: false,
-    get useEmojiRegionFlags () { return this._useEmojiRegionFlags },
-    set useEmojiRegionFlags (bool) {
-      this._useEmojiRegionFlags = bool
-      bool ? this.ui.useEmojiRegionFlags() : this.ui.usePlainTextRegionFlags()
-    },
+  /**@private */
+  _options = {
+    alignCenter: false,
+    useCompactMode: false,
+    useCustomDateFormat: false,
+    useEmojiRegionFlags: false,
+    useRegionalPrefixes: false,
   }
+
+  options = new Proxy(this._options, {
+    get (_options, /**@type keyof UI["_options"] */ key) {
+      return _options[key]
+    },
+    set: (_options, /**@type keyof UI["_options"] */ key, bool) => {
+      if (_options[key] === bool) return false
+      const ui = this
+      UI.optionHandlers[key].call(ui, bool)
+      _options[key] = bool
+      ui.saveOptions()
+      return true
+    }
+  })
 
   predicate = (/**@type Game */ game) => (
     (Region.instancesByCode[game.region]?.enabled ?? false)
@@ -126,11 +161,12 @@ export default class UI {
       onchange () { ui.options.useEmojiRegionFlags = /**@type HTMLInputElement */ (this).checked }
     })
 
+    this.cbUseRegionalPrefixes = createCheckbox({
+      onchange () { ui.options.useRegionalPrefixes = /**@type HTMLInputElement */ (this).checked }
+    })
+
     this.lblAlignCenter = createLabelForCheckbox(this.cbAlignCENTER, {
-      text: "Centrer",
-      props: {
-        title: "Centrer les colonnes"
-      }
+      text: "Centrer", props: { title: "Centrer les colonnes" }
     })
 
     this.lblUseCompactMode = createLabelForCheckbox(this.cbUseCompactMode, {
@@ -138,10 +174,11 @@ export default class UI {
     })
 
     this.lblUseEmojiFlags = createLabelForCheckbox(this.cbUseEmojiFlags, {
-      text: "Drapeaux",
-      props: {
-        title: "Utiliser des drapeaux pour les régions"
-      }
+      text: "Drapeaux", props: { title: "Utiliser des drapeaux pour les régions" }
+    })
+
+    this.lblUseRegionalPrefixes = createLabelForCheckbox(this.cbUseRegionalPrefixes, {
+      text: "Préfixes régionaux", props: { title: "Utiliser des préfixes pour les régions" }
     })
 
     this.seConsole = document.createElement("select")
@@ -160,6 +197,7 @@ export default class UI {
     })
   
     tb.onclick = (event) => {
+      // @ts-ignore
       const { originalTarget } = event
       let tr
       switch (originalTarget.tagName.toLowerCase()) {
@@ -175,10 +213,6 @@ export default class UI {
     }
   }
 
-  blink (/**@type Function */ callback, dt = 1000) {
-    return setInterval(callback, dt);
-  }
-
   createTooltipReference (/**@type string */ text) {
     const sup = document.createElement("sup")
     sup.textContent = text
@@ -186,6 +220,16 @@ export default class UI {
     sup.onmouseenter = () => { this.rt.hide(); this.rt.show(sup.getBoundingClientRect()) }
     sup.onmouseleave = () => this.rt.hide()
     return sup
+  }
+
+  hideColumnByIndex (/**@type number */ index) {
+    tb.classList.add(`hide-col-${index + 1}`)
+  }
+
+  hideColumnByName (/**@type string */ name) {
+    const column = this.columnsByName.get(name) ?? throwNewAssertionError()
+    const index = this.columns.indexOf(column)
+    if (index > -1) tb.classList.add(`hide-col-${index + 1}`)
   }
 
   initRows () {
@@ -199,6 +243,14 @@ export default class UI {
     this.seConsole.selectedIndex = 0
     for (const game of Game.instances) game.row.style.display = ""
     this.updateCounter(Game.instances.length)
+  }
+
+  saveOptions () {
+    try {
+      localStorage.setItem("SpyDB_options", JSON.stringify(this._options))
+    } catch (err) {
+      console.warn(err)
+    }
   }
 
   sortGames (/**@type NonNullable<Parameters<Array<Game>["sort"]>[0]> */ comparator) {
@@ -215,15 +267,14 @@ export default class UI {
     )
   }
 
-  toggleColumnByIndex (/**@type number */ index) {
-    tb.classList.toggle(`hide-col-${index + 1}`)
+  showColumnByIndex (/**@type number */ index) {
+    tb.classList.remove(`hide-col-${index + 1}`)
   }
 
-  toggleColumnByName (/**@type string */ name) {
-    const columnNames = this.columnDefinitions.map(c => c.name)
-    const index = columnNames.indexOf(name)
-    if (index < 0) return
-    tb.classList.toggle(`hide-col-${index + 1}`)
+  showColumnByName (/**@type string */ name) {
+    const column = this.columnsByName.get(name) ?? throwNewAssertionError()
+    const index = this.columns.indexOf(column)
+    if (index > -1) tb.classList.remove(`hide-col-${index + 1}`)
   }
 
   unload () {
@@ -235,15 +286,13 @@ export default class UI {
   }
 
   updateColumns () {
-    const gamePropertyKeys = this.columnDefinitions.map(c => c.propertyKey)
+    const gamePropertyKeys = this.columns.map(c => c.propertyKey)
     try { Game.updateColumns(gamePropertyKeys) } catch (err) { console.error(err.message) }
     const tr = tHead.querySelector("tr") ?? tHead.insertRow()
     tr.textContent = ""
-    for (const column of this.columnDefinitions) {
-      const th = document.createElement("th")
-      th.textContent = column.name
+    for (const column of this.columns) {
+      const { th } = column
       tr.appendChild(th)
-      column.th = th
       // Makes the column sortable by clicking on its header.
       th.onclick = () => {
         const { propertyKey, sortOrder } = column
@@ -288,7 +337,7 @@ export default class UI {
   }
 
   useCustomDateFormat () {
-    const columnIndex = this.columnDefinitions.findIndex(c => c.propertyKey === "releaseDate")
+    const columnIndex = this.columns.findIndex(c => c.propertyKey === "releaseDate")
     if (columnIndex < 0) return
     const months = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
     let datestring = ""
@@ -306,7 +355,7 @@ export default class UI {
   }
 
   useEmojiRegionFlags () {
-    const columnIndex = this.columnDefinitions.findIndex(c => c.propertyKey === "region")
+    const columnIndex = this.columns.findIndex(c => c.propertyKey === "region")
     if (columnIndex < 0) return
     tBody.classList.add("use-emoji-flags")
     for (const game of Game.instances) {
@@ -322,7 +371,7 @@ export default class UI {
   }
 
   useIsoDateFormat () {
-    const columnIndex = this.columnDefinitions.findIndex(c => c.propertyKey === "releaseDate")
+    const columnIndex = this.columns.findIndex(c => c.propertyKey === "releaseDate")
     if (columnIndex < 0) return
     for (const game of Game.instances) {
       game.row.cells[columnIndex].textContent = game.releaseDate
@@ -330,7 +379,7 @@ export default class UI {
   }
 
   usePlainTextRegionFlags () {
-    const columnIndex = this.columnDefinitions.findIndex(c => c.propertyKey === "region")
+    const columnIndex = this.columns.findIndex(c => c.propertyKey === "region")
     if (columnIndex < 0) return
     tBody.classList.remove("use-emoji-flags")
     for (const game of Game.instances) {

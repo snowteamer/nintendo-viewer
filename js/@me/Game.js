@@ -4,6 +4,7 @@
 
 import Region from "@me/Region.js";
 import { throwNewError } from "@me/utils.js";
+import UI from "@me/UI.js";
 
 function parseDateColumn (/**@type unknown */ arg) {
     switch (typeof arg) {
@@ -114,6 +115,9 @@ const INCONNU = "Inconnu"
 const TBA = "TBA"
 
 export default class Game {
+    /**@type unknown[] */
+    static rawDataRows = []
+
     /**@type Game[] */
     static instances = []
     /**@type Map<string, Game> */
@@ -178,7 +182,10 @@ export default class Game {
       if (row.cells.length) row.textContent = ""
       for (const key of Game.propertyKeys) {
         const td = row.insertCell()
-        const value = this[key]
+        let value = this[key]
+        if (key === "region") {
+            if (UI.instance?.options.useEmojiRegionFlags) value = Region.byCode(this.region).emoji
+        }
         if (key === "fullTitle" && String(value).includes("<ruby")) {
             td.innerHTML = String(value)
         } else {
@@ -229,6 +236,14 @@ export default class Game {
                 editorsJP, editorsNA, editorsEU,
                 licensors, lineage, note,
             ] of rowIterator) {
+                Game.rawDataRows.push({
+                    titleJP, transcription, titleNA, titleEU,
+                    physicalReleaseDateJP, physicalReleaseDateNA, physicalReleaseDateEU,
+                    digitalReleaseDateJP, digitalReleaseDateNA, digitalReleaseDateEU,
+                    consoleID, type, developers,
+                    editorsJP, editorsNA, editorsEU,
+                    licensors, lineage, note,
+                })
                 let title = "", digital = false, editors, digitalReleaseDate, physicalReleaseDate
                 for (const region of ["eu", "jp", "us-ca"]) {
                     switch (region) {
@@ -319,6 +334,7 @@ export default class Game {
         this.instances.length = 0
         this.instancesByID.clear()
         this.instancesByTitle.clear()
+        this.rawDataRows.length = 0
     }
 
     // TODO: avoid the HTML injection.
@@ -343,10 +359,21 @@ export default class Game {
     }
 
     static updateColumns (/**@type GamePropertyKey[] */ propertyKeys) {
-        const game = Game.instances[0]
-        if (game) for (const key of propertyKeys) if (!(key in game)) throwNewError(`Unknown game property: "${key}"`)
+        Game.validatePropertyKeys(propertyKeys)
         Game.propertyKeys = propertyKeys
+        Game.updateAllRows()
+    }
+
+    static updateAllRows () {
         for (const game of Game.instances) game.updateRow()
+    }
+
+    static validatePropertyKeys (/**@type GamePropertyKey[] */ propertyKeys) {
+        const game = Game.instances[0]
+        if (game) for (const key of propertyKeys) {
+            if (!(key in game)) throwNewError(`Unknown game property: "${key}"`)
+            if (typeof game[key] === "function") throwNewError(`Invalid game property: "${key}"`)
+        }
     }
 
     static *yieldPropertyValues (/**@type GamePropertyKey */ propertyKey) {

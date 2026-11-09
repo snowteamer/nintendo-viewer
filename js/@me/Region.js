@@ -21,12 +21,12 @@ export default class Region {
     /**@type HTMLLabelElement */
     label
 
-    constructor (/**@type string */ name, /**@type string */ code, { hasEmoji = false }) {
+    constructor (/**@type string */ name, /**@type string */ code) {
         this.name = name
         this.code = code
-        if (hasEmoji) this.emoji = code.includes("-")
-            ? code.split("-").map(codePart => this.getCountryFlag(codePart)).join("\u00A0")
-            : this.getCountryFlag(code)
+        this.emoji = code.includes("-")
+            ? code.split("-").map(codePart => Region.getCountryFlag(codePart)).join("\u00A0")
+            : Region.getCountryFlag(code)
         Region.instances.push(this)
         Region.instancesByCode[code] = this
         Region.instancesByName[name] = this
@@ -55,21 +55,11 @@ export default class Region {
         return Region.instancesByName[name] ?? throwNewError(`Unknown region name: "${name}"`)
     }
 
-    static load () {
-        ;/**@type [string, string, { hasEmoji: boolean }][] */ ([
-            ["Australia", "au", { hasEmoji: true }],
-            ["Europe", "eu", { hasEmoji: true }],
-            ["Japan", "jp", { hasEmoji: true }],
-            ["Korea", "kr", { hasEmoji: true }],
-            ["America", "us-ca", { hasEmoji: true }],
-        ]).forEach(args => new Region(...args))
-    }
-
     // Source - https://stackoverflow.com/a/44070554
     // Posted by Markus
     // Retrieved 2026-10-02, License - CC BY-SA 3.0
     // Create flag from country code
-    getCountryFlag (/**@type string */ code) {
+    static getCountryFlag (/**@type string */ code) {
       // Mild sanity check.
       if (code.length !== 2) return code;
       // Convert char to Regional Indicator Symbol Letter
@@ -78,6 +68,23 @@ export default class Region {
       }
       // Create RISL sequence from country code.
       return risl(code[0]) + risl(code[1]);
+    }
+
+    static load () {
+        ;/**@type [string, string][] */ ([
+            ["Australie", "au"],
+            ["Europe", "eu"],
+            ["Japon", "jp"],
+            ["Corée du Sud", "kr"],
+            ["USA et Canada", "us-ca"],
+        ]).forEach(args => new Region(...args))
+    }
+
+    createALink () {
+        return Object.assign(document.createElement("a"), {
+            href: `https://fr.wikipedia.org/wiki/${this.name}`,
+            textContent: this.emoji || this.code
+        })
     }
 }
 

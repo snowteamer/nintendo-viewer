@@ -7,7 +7,9 @@
         "lib": ["DOM", "esnext"],
         "strictNullChecks": true,
         "strictFunctionTypes": true,
-        "strict": true
+        "strict": true,
+        "useUnknownInCatchVariables": false,
+        "types": ["./js/@me/types.d.ts"]
     },
     "exports": "./app.ts",
     "imports": {
