@@ -1,9 +1,12 @@
 export default class Column {
   highlighted = false
+  selectedValue = ""
   sortOrder = ""
 
   /**@type HTMLTableColElement */
   col = document.createElement("col")
+  /**@type HTMLSelectElement */
+  se = document.createElement("select")
   /**@type HTMLTableCellElement */
   th = document.createElement("th")
 

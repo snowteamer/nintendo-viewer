@@ -213,6 +213,29 @@ export default class UI {
     }
   }
 
+  createSelectFromColumn (/**@type Column */ column) {
+    const se = document.createElement("select")
+    se.add(Object.assign(new Option("Toutes consoles", "", true)))
+    const ui = this
+    se.onchange = function () {
+      column.selectedValue = se.value
+      ui.updatePredicate()
+      if (se.value === "") ui.hideColumnByName(column.name)
+      else ui.showColumnByName(column.name)
+    }
+    return se
+  }
+
+  updateSelectFromColumn (/**@type Column */ column) {
+    const { se } = column
+    /**@type Set<string> */
+    const valueSet = new Set(Game.instances.map(g => String(g[column.propertyKey])).sort())
+    se.options.length = 1 // Keeps only the "Toutes" option.
+    for (const value of valueSet) {
+      se.appendChild(new Option(value, value))
+    }
+  }
+
   createTooltipReference (/**@type string */ text) {
     const sup = document.createElement("sup")
     sup.textContent = text
@@ -313,9 +336,7 @@ export default class UI {
     // View
     this.seConsole.options.length = 1 // Keeps only the "Toutes" option.
     for (const consoleName of this.consoleNames) {
-      this.seConsole.appendChild(
-        Object.assign(document.createElement("option"), { text: consoleName, value: consoleName })
-      )
+      this.seConsole.appendChild(new Option(consoleName, consoleName))
     }
   }
 

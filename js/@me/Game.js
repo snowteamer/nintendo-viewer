@@ -229,23 +229,23 @@ export default class Game {
             // ["Titre JP", "Titre NA", "Titre EU", "Date JP Phys", "Date NA Phys", "Date EU Phys", "Date JP Dig", "Date NA Dig", "Date EU Dig", "Console", "Type", "Développeur", "Editeur jp", "Editeur NA", "Editeur EU", "Licensors", "Série", "Note"]
             // TODO: make this configurable via a schema.
             for (const [
-                titleJP, transcription, titleNA, titleEU,
-                physicalReleaseDateJP, physicalReleaseDateNA, physicalReleaseDateEU,
-                digitalReleaseDateJP, digitalReleaseDateNA, digitalReleaseDateEU,
+                titleJP, transcription, titleNA, titleEU, titleAU,
+                physicalReleaseDateJP, physicalReleaseDateNA, physicalReleaseDateEU, physicalReleaseDateAU,
+                digitalReleaseDateJP, digitalReleaseDateNA, digitalReleaseDateEU, digitalReleaseDateAU,
                 consoleID, type, developers,
-                editorsJP, editorsNA, editorsEU,
+                editorsJP, editorsNA, editorsEU, editorsAU,
                 licensors, lineage, note,
             ] of rowIterator) {
                 Game.rawDataRows.push({
-                    titleJP, transcription, titleNA, titleEU,
-                    physicalReleaseDateJP, physicalReleaseDateNA, physicalReleaseDateEU,
-                    digitalReleaseDateJP, digitalReleaseDateNA, digitalReleaseDateEU,
+                    titleJP, transcription, titleNA, titleEU, titleAU,
+                    physicalReleaseDateJP, physicalReleaseDateNA, physicalReleaseDateEU, physicalReleaseDateAU,
+                    digitalReleaseDateJP, digitalReleaseDateNA, digitalReleaseDateEU, digitalReleaseDateAU,
                     consoleID, type, developers,
-                    editorsJP, editorsNA, editorsEU,
+                    editorsJP, editorsNA, editorsEU, editorsAU,
                     licensors, lineage, note,
                 })
                 let title = "", digital = false, editors, digitalReleaseDate, physicalReleaseDate
-                for (const region of ["eu", "jp", "us-ca"]) {
+                for (const region of ["eu", "jp", "us-ca", "au"]) {
                     switch (region) {
                         case "eu": {
                             title = titleEU; editors = editorsEU; digitalReleaseDate = digitalReleaseDateEU; physicalReleaseDate = physicalReleaseDateEU;
@@ -257,6 +257,10 @@ export default class Game {
                         }
                         case "us-ca": {
                             title = titleNA; editors = editorsNA; digitalReleaseDate = digitalReleaseDateNA; physicalReleaseDate = physicalReleaseDateNA;
+                            break
+                        }
+                        case "au": {
+                            title = titleAU; editors = editorsAU; digitalReleaseDate = digitalReleaseDateAU; physicalReleaseDate = physicalReleaseDateAU;
                             break
                         }
                     }
