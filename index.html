@@ -41,24 +41,6 @@
       return await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`).then(r => r.json())
     }
 
-    function setRegionalPrefix (element, ...regions) {
-      element.classList.add("has-regional-prefix");
-      element.style.setProperty("--regions", `"${regions.join("\u00A0")}"`)
-    }
-
-    function setRegionalSuffix (element, ...regions) {
-      element.classList.add("has-regional-suffix");
-      element.style.setProperty("--regions", `"${regions.join("\u00A0")}"`)
-    }
-
-    function unsetRegionalPrefix (element, ...regions) {
-      element.classList.remove("has-regional-prefix");
-    }
-
-    function unsetRegionalSuffix (element, ...regions) {
-      element.classList.remove("has-regional-suffix");
-    }
-
     ;(async () => {
       /* Asynchronous imports */
       window.dom = await import("@me/dom.js")
@@ -79,7 +61,7 @@
         ui.btnRegionALL,
         ui.btnRegionNONE,
         ui.seConsole,
-        ui.lblUseEmojiFlags,
+        ui.lblUseRegionalFlags,
         ui.lblAlignCenter,
         ui.lblUseCompactMode,
         ui.lblUseRegionalPrefixes,

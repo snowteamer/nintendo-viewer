@@ -1,12 +1,59 @@
-import { tb, tBody, tHead } from "@me/dom.js"
-import { createCheckbox, createLabelForCheckbox, throwNewError } from "@me/utils.js";
-import Column from "@me/Column.js";
+import { colgroup, tb, tBody, tHead } from "@me/dom.js"
+import { createCheckbox, createLabelForCheckbox, throwNewError } from "@me/utils.js"
+import Column from "@me/Column.js"
 import Game from "@me/Game.js"
-import ReferenceTooltip from "@me/ReferenceTooltip.js";
-import Region from "@me/Region.js";
-import { throwNewAssertionError } from "@me/tc.js";
+import ReferenceTooltip from "@me/ReferenceTooltip.js"
+import Region from "@me/Region.js"
+import { throwNewAssertionError } from "@me/tc.js"
 
+function setPrefixImage (/**@type HTMLElement */ element, /**@type string */ cssImageValue) {
+  if (cssImageValue === "") {
+    element.classList.remove("has-prefix-image")
+  } else {
+    element.classList.add("has-prefix-image")
+    element.style.setProperty("--prefix-image", cssImageValue)
+  }
+}
 
+function setPrefixImageSuper (/**@type HTMLElement */ element, /**@type string */ cssImageValue) {
+  if (cssImageValue === "") {
+    element.classList.remove("has-prefix-image-super")
+  } else {
+    element.classList.add("has-prefix-image-super")
+    element.style.setProperty("--prefix-image", cssImageValue)
+  }
+}
+
+function setPrefixSuper (/**@type HTMLElement */ element, /**@type string[] */ ...prefixes) {
+  if (prefixes.length) {
+    element.classList.add("has-prefix-super")
+    element.style.setProperty("--prefix", `"${prefixes.join("\u00A0")}"`)
+  } else {
+    element.classList.remove("has-prefix-super")
+  }
+}
+
+function setSuffixSuper (/**@type HTMLElement */ element, /**@type string[] */ ...suffixes) {
+  if (suffixes.length) {
+    element.classList.add("has-suffix-super")
+    element.style.setProperty("--suffix", `"${suffixes.join("\u00A0")}"`)
+  } else {
+    element.classList.remove("has-suffix-super")
+  }
+}
+
+function unsetPrefix (/**@type HTMLElement */ element) {
+  element.classList.remove("has-prefix");
+}
+function unsetPrefixSuper (/**@type HTMLElement */ element) {
+  element.classList.remove("has-prefix-super");
+}
+function unsetSuffix (/**@type HTMLElement */ element) {
+  element.classList.remove("has-suffix");
+}
+function unsetSuffixSuper (/**@type HTMLElement */ element) {
+  element.classList.remove("has-suffix-super");
+}
 
 export default class UI {
   /**@type UI? */
@@ -46,8 +93,8 @@ export default class UI {
     useCustomDateFormat (bool) {
       bool ? this.useCustomDateFormat() : this.useIsoDateFormat()
     },
-    useEmojiRegionFlags (bool) {
-      bool ? this.useEmojiRegionFlags() : this.usePlainTextRegionFlags()
+    useRegionalFlags (bool) {
+      bool ? this.useRegionalFlags() : this.usePlainTextRegionFlags()
     },
     useRegionalPrefixes (bool) {
       const ui = this
@@ -55,12 +102,12 @@ export default class UI {
       if (bool) {
         ui.hideColumnByName("Région")
         for (const game of Game.instances) {
-          window.setRegionalPrefix(game.row.cells[index], game.region)
+          setPrefixSuper(game.row.cells[index], game.region)
         }
       } else {
         ui.showColumnByName("Région")
         for (const game of Game.instances) {
-          window.unsetRegionalPrefix(game.row.cells[index])
+          unsetPrefixSuper(game.row.cells[index])
         }
       }
     }
@@ -79,7 +126,7 @@ export default class UI {
     alignCenter: false,
     useCompactMode: false,
     useCustomDateFormat: false,
-    useEmojiRegionFlags: false,
+    useRegionalFlags: false,
     useRegionalPrefixes: false,
   }
 
@@ -157,8 +204,8 @@ export default class UI {
       onchange () { ui.options.useCompactMode = /**@type HTMLInputElement */ (this).checked }
     })
 
-    this.cbUseEmojiFlags = createCheckbox({
-      onchange () { ui.options.useEmojiRegionFlags = /**@type HTMLInputElement */ (this).checked }
+    this.cbUseRegionalFlags = createCheckbox({
+      onchange () { ui.options.useRegionalFlags = /**@type HTMLInputElement */ (this).checked }
     })
 
     this.cbUseRegionalPrefixes = createCheckbox({
@@ -173,12 +220,12 @@ export default class UI {
       text: "Mode compact",
     })
 
-    this.lblUseEmojiFlags = createLabelForCheckbox(this.cbUseEmojiFlags, {
-      text: "Drapeaux", props: { title: "Utiliser des drapeaux pour les régions" }
+    this.lblUseRegionalFlags = createLabelForCheckbox(this.cbUseRegionalFlags, {
+      text: "Drapeaux", props: { title: "Afficher des drapeaux pour les régions" }
     })
 
     this.lblUseRegionalPrefixes = createLabelForCheckbox(this.cbUseRegionalPrefixes, {
-      text: "Préfixes régionaux", props: { title: "Utiliser des préfixes pour les régions" }
+      text: "Préfixes régionaux", props: { title: "Afficher des préfixes pour les régions" }
     })
 
     this.seConsole = document.createElement("select")
@@ -314,7 +361,8 @@ export default class UI {
     const tr = tHead.querySelector("tr") ?? tHead.insertRow()
     tr.textContent = ""
     for (const column of this.columns) {
-      const { th } = column
+      const { col, th } = column
+      colgroup.appendChild(col)
       tr.appendChild(th)
       // Makes the column sortable by clicking on its header.
       th.onclick = () => {
@@ -375,14 +423,21 @@ export default class UI {
     }
   }
 
-  useEmojiRegionFlags () {
+  useRegionalFlags () {
     const columnIndex = this.columns.findIndex(c => c.propertyKey === "region")
     if (columnIndex < 0) return
     tBody.classList.add("use-emoji-flags")
     for (const game of Game.instances) {
       const { region: code } = game
       const region = Region.byCode(code)
-      game.row.cells[columnIndex].textContent = region.emoji || region.code
+      const cell = game.row.cells[columnIndex]
+      if (region.useImage) {
+        setPrefixImage(cell, `url(../webp/${region.code}.webp)`)
+        cell.textContent = ""
+      } else {
+        setPrefixImage(cell, "")
+        cell.textContent = region.emoji || region.code
+      }
     }
     for (const region of Region.instances) {
       if (region.checkbox.nextSibling instanceof Text) {
@@ -404,7 +459,9 @@ export default class UI {
     if (columnIndex < 0) return
     tBody.classList.remove("use-emoji-flags")
     for (const game of Game.instances) {
-      game.row.cells[columnIndex].textContent = game.region
+      const cell = game.row.cells[columnIndex]
+      cell.textContent = game.region
+      setPrefixImage(cell, "")
     }
     for (const region of Region.instances) {
       if (region.checkbox.nextSibling instanceof Text) {

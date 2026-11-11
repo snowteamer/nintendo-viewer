@@ -48,22 +48,33 @@ ruby[data-dessous] {
 	user-select: none;
 }
 
-.has-regional-prefix::before {
-	content: var(--regions);
-	font-style: italic;
-	font-variant-caps: small-caps;
-	font-weight: bold;
-	margin-right: 2px;
-	vertical-align: super;
-}
+/*
+background-image: url(./webp/us-ca.webp);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-origin: content-box;
+*/
 
 /* For use with images */
 
-.has-regional-prefix-image::before {
-	--emoji-image: none;
+.has-prefix-image::before {
 	content: '';
 	display: inline-block;
-	background-image: var(--emoji-image); /* url(../webp/us-ca.webp); */
+	aspect-ratio: var(--prefix-image-aspect-ratio, 2);
+	background-image: var(--prefix-image);
+	background-repeat: no-repeat;
+	background-size: cover;
+	box-shadow: black 1px 1px 2px;
+	height: 1em;
+	margin-right: 2px;
+}
+
+.has-prefix-image-super::before {
+	content: '';
+	display: inline-block;
+	aspect-ratio: var(--prefix-image-aspect-ratio, 2);
+	background-image: var(--prefix-image);
 	background-repeat: no-repeat;
 	background-size: cover;
 	box-shadow: black 1px 1px 2px;
@@ -71,11 +82,19 @@ ruby[data-dessous] {
 	margin-bottom: 1px;
 	margin-right: 2px;
 	vertical-align: super;
-	width: 2em;
 }
 
-.has-regional-suffix::after {
-	content: var(--regions);
+.has-prefix-super::before {
+	content: var(--prefix);
+	font-style: italic;
+	font-variant-caps: small-caps;
+	font-weight: bold;
+	margin-right: 2px;
+	vertical-align: super;
+}
+
+.has-suffix-super::after {
+	content: var(--suffix);
 	font-style: italic;
 	font-variant-caps: small-caps;
 	font-weight: bold;

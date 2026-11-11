@@ -184,7 +184,7 @@ export default class Game {
         const td = row.insertCell()
         let value = this[key]
         if (key === "region") {
-            if (UI.instance?.options.useEmojiRegionFlags) value = Region.byCode(this.region).emoji
+            if (UI.instance?.options.useRegionalFlags) value = Region.byCode(this.region).emoji
         }
         if (key === "fullTitle" && String(value).includes("<ruby")) {
             td.innerHTML = String(value)

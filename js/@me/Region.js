@@ -14,6 +14,7 @@ export default class Region {
     name = ""
     /**@type Region? */
     parent = null
+    useImage = false
 
     /**@type HTMLInputElement */
     checkbox
@@ -21,12 +22,13 @@ export default class Region {
     /**@type HTMLLabelElement */
     label
 
-    constructor (/**@type string */ name, /**@type string */ code) {
+    constructor (/**@type string */ name, /**@type string */ code, { useImage = false } = {}) {
         this.name = name
         this.code = code
         this.emoji = code.includes("-")
             ? code.split("-").map(codePart => Region.getCountryFlag(codePart)).join("\u00A0")
             : Region.getCountryFlag(code)
+        this.useImage = useImage
         Region.instances.push(this)
         Region.instancesByCode[code] = this
         Region.instancesByName[name] = this
@@ -41,9 +43,7 @@ export default class Region {
         })
         this.label = createLabelForCheckbox(this.checkbox, {
             text: code.toUpperCase(),
-            props: {
-                title: name
-            }
+            props: { title: name }
         })
     }
 
@@ -71,12 +71,12 @@ export default class Region {
     }
 
     static load () {
-        ;/**@type [string, string][] */ ([
-            ["Australie", "au"],
-            ["Europe", "eu"],
-            ["Japon", "jp"],
-            ["Corée du Sud", "kr"],
-            ["USA et Canada", "us-ca"],
+        ;/**@type [string, string, { useImage: boolean }][] */ ([
+            ["Australie", "au", { useImage: false }],
+            ["Europe", "eu", { useImage: false }],
+            ["Japon", "jp", { useImage: false }],
+            ["Corée du Sud", "kr", { useImage: false }],
+            ["USA et Canada", "us-ca", { useImage: true }],
         ]).forEach(args => new Region(...args))
     }
 
