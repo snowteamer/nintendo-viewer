@@ -15,7 +15,7 @@ function setPrefixImage (/**@type HTMLElement */ element, /**@type string */ css
   }
 }
 
-function setPrefixImageSuper (/**@type HTMLElement */ element, /**@type string */ cssImageValue) {
+export function setPrefixImageSuper (/**@type HTMLElement */ element, /**@type string */ cssImageValue) {
   if (cssImageValue === "") {
     element.classList.remove("has-prefix-image-super")
   } else {
@@ -24,7 +24,7 @@ function setPrefixImageSuper (/**@type HTMLElement */ element, /**@type string *
   }
 }
 
-function setPrefixSuper (/**@type HTMLElement */ element, /**@type string[] */ ...prefixes) {
+export function setPrefixSuper (/**@type HTMLElement */ element, /**@type string[] */ ...prefixes) {
   if (prefixes.length) {
     element.classList.add("has-prefix-super")
     element.style.setProperty("--prefix", `"${prefixes.join("\u00A0")}"`)
@@ -62,7 +62,7 @@ export default class UI {
   /**@type ColumnDefinition[] */
   columnDefinitions = [
     { name: "Région", propertyKey: "region" },
-    { name: "Titre", propertyKey: "title" },
+    { name: "Titre", propertyKey: "fullTitle" },
     { name: "Console", propertyKey: "console" },
     { name: "Digital", propertyKey: "digital" },
     { name: "Développeur(s)", propertyKey: "developers" },

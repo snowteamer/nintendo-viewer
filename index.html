@@ -13,6 +13,8 @@
         <colgroup id="colgroup"></colgroup>
       </table>
     </div>
+    <div id="section-list"></div>
+    <div id="footer"></div>
   </body>
   <script type="importmap">
     {
@@ -50,6 +52,7 @@
       window.Region.load()
       window.ReferenceTooltip = await utils.importModule("@me/ReferenceTooltip.js")
       window.UI = await utils.importModule("@me/UI.js")
+      window.WikitableSection = await utils.importModule("@me/WikitableSection.js")
       window.ui = new UI()
       /* Additional globals for convenience */
       Object.assign(window, { regions: Region.instances }, utils)

@@ -1,6 +1,3 @@
-/**@typedef {keyof Game} GamePropertyKey */
-/**@typedef {string} isostring - ISO 8601 string, possibly truncated to month or day precision. */
-/**@typedef {(0 | 1 | 2)} completionStatus - ISO 8601 string, possibly truncated to month or day precision. */
 
 import Region from "@me/Region.js";
 import { throwNewError } from "@me/utils.js";
@@ -115,8 +112,8 @@ const INCONNU = "Inconnu"
 const TBA = "TBA"
 
 export default class Game {
-    /**@type unknown[] */
-    static rawDataRows = []
+    /**@type RawGameEntry[] */
+    static rawEntries = []
 
     /**@type Game[] */
     static instances = []
@@ -218,7 +215,7 @@ export default class Game {
     static async loadFile (/**@type File */ file) {
         console.debug("Loading file:", file)
         const t0 = Date.now()
-        /**@type { { sheet: string; data: unknown[][] }[] } */
+        /**@type { { sheet: string; data: any[][] }[] } */
         const sheets = await readXlsxFile(file)
         for (const { sheet: name, data: rows } of sheets) {
             console.log("Loading sheet \"%s\" (%d rows)", name, rows.length);
@@ -226,22 +223,22 @@ export default class Game {
             // Skips the first row.
             const columnNames = rowIterator.next().value ?? []
             if (!columnNames.length) continue;
-            // ["Titre JP", "Titre NA", "Titre EU", "Date JP Phys", "Date NA Phys", "Date EU Phys", "Date JP Dig", "Date NA Dig", "Date EU Dig", "Console", "Type", "Développeur", "Editeur jp", "Editeur NA", "Editeur EU", "Licensors", "Série", "Note"]
             // TODO: make this configurable via a schema.
-            for (const [
-                titleJP, transcription, titleNA, titleEU, titleAU,
-                physicalReleaseDateJP, physicalReleaseDateNA, physicalReleaseDateEU, physicalReleaseDateAU,
-                digitalReleaseDateJP, digitalReleaseDateNA, digitalReleaseDateEU, digitalReleaseDateAU,
-                consoleID, type, developers,
-                editorsJP, editorsNA, editorsEU, editorsAU,
-                licensors, lineage, note,
-            ] of rowIterator) {
-                Game.rawDataRows.push({
-                    titleJP, transcription, titleNA, titleEU, titleAU,
-                    physicalReleaseDateJP, physicalReleaseDateNA, physicalReleaseDateEU, physicalReleaseDateAU,
-                    digitalReleaseDateJP, digitalReleaseDateNA, digitalReleaseDateEU, digitalReleaseDateAU,
+            for (const dataRow of rowIterator) {
+                const [
+                    titleJP, transcription, titleUSCA, titleEU, titleAU,
+                    physicalReleaseDateJP, physicalReleaseDateUSCA, physicalReleaseDateEU, physicalReleaseDateAU,
+                    digitalReleaseDateJP, digitalReleaseDateUSCA, digitalReleaseDateEU, digitalReleaseDateAU,
                     consoleID, type, developers,
-                    editorsJP, editorsNA, editorsEU, editorsAU,
+                    editorsJP, editorsUSCA, editorsEU, editorsAU,
+                    licensors, lineage, note,
+                ] = dataRow
+                Game.rawEntries.push({
+                    titleJP, transcription, titleUSCA, titleEU, titleAU,
+                    physicalReleaseDateJP, physicalReleaseDateUSCA, physicalReleaseDateEU, physicalReleaseDateAU,
+                    digitalReleaseDateJP, digitalReleaseDateUSCA, digitalReleaseDateEU, digitalReleaseDateAU,
+                    consoleID, type, developers,
+                    editorsJP, editorsUSCA, editorsEU, editorsAU,
                     licensors, lineage, note,
                 })
                 let title = "", digital = false, editors, digitalReleaseDate, physicalReleaseDate
@@ -256,7 +253,7 @@ export default class Game {
                             break
                         }
                         case "us-ca": {
-                            title = titleNA; editors = editorsNA; digitalReleaseDate = digitalReleaseDateNA; physicalReleaseDate = physicalReleaseDateNA;
+                            title = titleUSCA; editors = editorsUSCA; digitalReleaseDate = digitalReleaseDateUSCA; physicalReleaseDate = physicalReleaseDateUSCA;
                             break
                         }
                         case "au": {
@@ -290,14 +287,7 @@ export default class Game {
                             new Game(String(title), consoleID, gameCtorOptions)
                         }
                     } catch (err) {
-                        console.error(err, [
-                            titleJP, transcription, titleNA, titleEU,
-                            physicalReleaseDateJP, physicalReleaseDateNA, physicalReleaseDateEU,
-                            digitalReleaseDateJP, digitalReleaseDateNA, digitalReleaseDateEU,
-                            consoleID, type, developers,
-                            editorsJP, editorsNA, editorsEU,
-                            licensors, lineage, note,
-                        ])
+                        console.error(err, "Data row:", dataRow)
                     }
                 }
             }
@@ -338,7 +328,7 @@ export default class Game {
         this.instances.length = 0
         this.instancesByID.clear()
         this.instancesByTitle.clear()
-        this.rawDataRows.length = 0
+        this.rawEntries.length = 0
     }
 
     // TODO: avoid the HTML injection.

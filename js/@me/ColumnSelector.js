@@ -1,7 +1,7 @@
 
 /*
     <details class="column-picker">
-        <summary>⚙️ Afficher / Masquer les colonnes</summary>
+        <summary>⚙️ Colonnes...</summary>
         <div class="picker-menu">
             <label><input type="checkbox" data-column="col-id" checked> ID</label>
             <label><input type="checkbox" data-column="col-nom" checked> Nom</label>
@@ -12,7 +12,15 @@
 */
 
 export default class ColumnSelector {
+    /**@type string[] */
+    columnNames = []
 
+    constructor (/**@type string[] */ columnNames = []) {
+        this.columnNames.push(...columnNames)
+        for (const name of this.columnNames) {
+            
+        }
+    }
 
 
 }
