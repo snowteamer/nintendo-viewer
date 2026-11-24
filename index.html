@@ -43,16 +43,30 @@
       return await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`).then(r => r.json())
     }
 
+    function hideSections () {
+      dom.sectionList.style.display = "none"
+    }
+
+    function showSections () {
+      for (const consoleName of ui.consoleNames) {
+        const wt = new Wikitable(consoleName, (/**@type RawGameEntry */ rge) => rge.consoleID === consoleName)
+        dom.sectionList.appendChild(wt.table)
+        wt.update(consoleName)
+      }
+      dom.sectionList.style.display = ""
+    }
+
     ;(async () => {
       /* Asynchronous imports */
       window.dom = await import("@me/dom.js")
       window.utils = await import("@me/utils.js")
+      window.Console = await utils.importModule("@me/Console.js")
       window.Game = await utils.importModule("@me/Game.js")
       window.Region = await utils.importModule("@me/Region.js")
       window.Region.load()
       window.ReferenceTooltip = await utils.importModule("@me/ReferenceTooltip.js")
       window.UI = await utils.importModule("@me/UI.js")
-      window.WikitableSection = await utils.importModule("@me/WikitableSection.js")
+      window.Wikitable = await utils.importModule("@me/Wikitable.js")
       window.ui = new UI()
       /* Additional globals for convenience */
       Object.assign(window, { regions: Region.instances }, utils)
@@ -68,6 +82,7 @@
         ui.lblAlignCenter,
         ui.lblUseCompactMode,
         ui.lblUseRegionalPrefixes,
+        ui.lblUseSpypiledMode,
         ui.btnUnload,
       )
     })();

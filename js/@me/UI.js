@@ -59,28 +59,6 @@ export default class UI {
   /**@type UI? */
   static instance = null
 
-  /**@type ColumnDefinition[] */
-  columnDefinitions = [
-    { name: "Région", propertyKey: "region" },
-    { name: "Titre", propertyKey: "fullTitle" },
-    { name: "Console", propertyKey: "console" },
-    { name: "Digital", propertyKey: "digital" },
-    { name: "Développeur(s)", propertyKey: "developers" },
-    { name: "Éditeur(s)", propertyKey: "editors" },
-    { name: "Licenseur(s)", propertyKey: "licensors" },
-    { name: "Date", propertyKey: "releaseDate" },
-    { name: "Série", propertyKey: "lineage" },
-    { name: "Type", propertyKey: "type", },
-    // { name: "Note", propertyKey: "note" },
-  ]
-
-  /**@type Column[] */
-  columns = this.columnDefinitions.map(definition => new Column(definition))
-
-  /**@type Map<string, Column> */
-  columnsByName = new Map(this.columns.map(column => [column.name, column]))
-  /**@type Map<string, Column> */
-  columnsByPropertyKey = new Map(this.columns.map(column => [column.propertyKey, column]))
 
   /**@type Record<keyof UI["_options"], (this: UI, arg: boolean) => void> */
   static optionHandlers = {
@@ -112,6 +90,29 @@ export default class UI {
       }
     }
   }
+
+  /**@type ColumnDefinition[] */
+  columnDefinitions = [
+    { name: "Région", propertyKey: "region" },
+    { name: "Titre", propertyKey: "fullTitle" },
+    { name: "Console", propertyKey: "console" },
+    { name: "Digital", propertyKey: "digital" },
+    { name: "Développeur(s)", propertyKey: "developers" },
+    { name: "Éditeur(s)", propertyKey: "editors" },
+    { name: "Licenseur(s)", propertyKey: "licensors" },
+    { name: "Date", propertyKey: "releaseDate" },
+    { name: "Série", propertyKey: "lineage" },
+    { name: "Type", propertyKey: "type", },
+    // { name: "Note", propertyKey: "note" },
+  ]
+
+  /**@type Column[] */
+  columns = this.columnDefinitions.map(definition => new Column(definition))
+
+  /**@type Map<string, Column> */
+  columnsByName = new Map(this.columns.map(column => [column.name, column]))
+  /**@type Map<string, Column> */
+  columnsByPropertyKey = new Map(this.columns.map(column => [column.propertyKey, column]))
 
   /**@type string[] */
   consoleNames = []
@@ -212,12 +213,25 @@ export default class UI {
       onchange () { ui.options.useRegionalPrefixes = /**@type HTMLInputElement */ (this).checked }
     })
 
+    this.cbUseSpypiledMode = createCheckbox({
+      onchange () {
+        ;/**@type HTMLInputElement */ (this).checked ? showSections() : hideSections()
+        ;/**@type HTMLInputElement */ (this).checked ? tb.style.display = "none" : tb.style.display = ""
+      },
+      textContent: "Une wikitable par console",
+      title: "Afficher une wikitable par console distincte"
+    })
+
     this.lblAlignCenter = createLabelForCheckbox(this.cbAlignCENTER, {
       text: "Centrer", props: { title: "Centrer les colonnes" }
     })
 
     this.lblUseCompactMode = createLabelForCheckbox(this.cbUseCompactMode, {
       text: "Mode compact",
+    })
+
+    this.lblUseSpypiledMode = createLabelForCheckbox(this.cbUseSpypiledMode, {
+      text: "Mode spypilé", props: { title: "Afficher une wikitable par console distincte" }
     })
 
     this.lblUseRegionalFlags = createLabelForCheckbox(this.cbUseRegionalFlags, {

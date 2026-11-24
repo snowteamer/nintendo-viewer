@@ -2,10 +2,10 @@
 import Region from "@me/Region.js";
 import { throwNewError } from "@me/utils.js";
 import UI from "@me/UI.js";
+import Console from "@me/Console.js";
 
 function parseDateColumn (/**@type unknown */ arg) {
     switch (typeof arg) {
-        case "number": return String(arg)
         case "object": {
             if (arg === null) return ""
             if (arg instanceof Date) {
@@ -15,7 +15,7 @@ function parseDateColumn (/**@type unknown */ arg) {
             return ""
         }
         case "string": return arg
-        default: return arg
+        default: return String(arg)
     }
 }
 
@@ -25,59 +25,6 @@ const CompletionStatus = Object.freeze({
     COMPLETED: 2,
     PERFECTED: 3,
 })
-
-const Console = Object.freeze({
-    ARCADE: { en: "Arcade" },
-    DEDICATED: { en: "Console dédiée" },
-    colorTvGame: { jp: "Color TV-Game" },
-    "3ds": { jp: "3DS" },
-    "3dsES": { jp: "3DS eShop" },
-    "3dsVC": { jp: "3DS Virtual Console" },
-    ds: { en: "DS" },
-    dsDownloadPlay: { jp: "DS Download Play" },
-    dsIWare: { jp: "DSiWare" },
-    eReader: { jp: "e-Reader" },
-    famicomSwitchOnline: { jp: "Famicom Switch Online" },
-    fds: { jp: "Famicom Disk System" },
-    gw: { jp: "Game & Watch" },
-    gb: { en: "Game Boy" },
-    gba: { en: "Game Boy Advance" },
-    gbc: { en: "Game Boy Color" },
-    gbSwitchOnline: { jp: "GB Switch Online" },
-    gbaSwitchOnline: { jp: "GBA Switch Online" },
-    gbcSwitchOnline: { jp: "GBC Switch Online" },
-    gc: { en: "GameCube" },
-    gcSwitchOnline: { en: "GC Switch Online" },
-    nes: { en: "Nintendo Entertainment System", jp: "Famicom" },
-    n64: { en: "Nintendo 64" },
-    n64dd: { jp: "Nintendo 64DD" },
-    n64SwitchOnline: { jp: "N64 Switch Online" },
-    pc1O: { en: "PlayChoice-10" },
-    pgb: { jp: "Nintendo Power GB" },
-    pgbc: { jp: "Nintendo Power GBC" },
-    pokémonMini: { jp: "Pokémon Mini" },
-    psf: { jp: "Nintendo Power SF" },
-    ps1: { en: "PlayStation" },
-    ps2: { en: "PlayStation 2" },
-    ps3: { en: "PlayStation 3" },
-    ps4: { en: "PlayStation 4" },
-    ps5: { en: "PlayStation 5" },
-    ps6: { en: "PlayStation 6" },
-    sfSwitchOnline: { jp: "SF Switch Online" },
-    snes: { en: "Super Nintendo", jp: "Super Famicom" },
-    switch: { en: "Switch" },
-    switchES: { en: "Switch eShop" },
-    switch2: { en: "Switch 2" },
-    switch2ES: { en: "Switch 2 eShop" },
-    sv: { jp: "Satellaview" },
-    vb: { jp: "Virtual Boy" },
-    vbSwitchOnline: { en: "VB Switch Online" },
-    vss: { jp: "VS. System" },
-    wii: { all: "Wii" },
-    wiiUES: { all: "Wii U eShop" },
-    wiiVC: { all: "Wii Virtual Console" },
-})
-
 
 const GameType = Object.freeze({
     CLONE: "Clone",
@@ -268,10 +215,12 @@ export default class Game {
                     try {
                         const gameCtorOptions = {
                             developers: developers?.split(", ") ?? [],
+                            digital: false,
                             editors: editors?.split(", ") ?? [],
                             licensors: licensors?.split(", ") ?? [],
                             lineage: lineage ?? "",
                             note: note ?? "",
+                            releaseDate: "",
                             region,
                             transcription,
                             type,

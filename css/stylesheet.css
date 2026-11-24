@@ -223,12 +223,13 @@
 body {
 	display: flex;
 	flex-flow: column;
+  font-family: sans-serif;
 	height: 100vh;
 	margin: 0px;
 }
 
 rt {
-  font-size: 1em;
+  font-size: 0.8em;
 }
 
 ruby {
@@ -268,6 +269,12 @@ ruby[data-dessous] {
 	font-family: sans-serif;
 	margin: 0 0.2em;
 	user-select: none;
+}
+
+#section-list {
+  overflow: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 /*
@@ -442,31 +449,36 @@ background-image: url(./webp/us-ca.webp);
 
 /* Wikipedia-like Table Styling */
 .wikitable2 {
-    background-color: #f8f9fa;
-    color: #202122;
-    margin: 1em 0;
-    border: 1px solid #a2a9b1;
-    border-collapse: collapse;
-    font-family: sans-serif;
-    font-size: 85%; /* Wikipedia uses a slightly smaller text size for tables */
+  background-color:var(--background-color-neutral-subtle,#f8f9fa);
+  color:var(--color-base,#202122);
+  margin:1em 0;
+  border:1px solid var(--border-color-base,#a2a9b1);
+  border-collapse:collapse
+}
+.wikitable2 > tr > th,
+.wikitable2 > tr > td,
+.wikitable2 > * > tr > th,
+.wikitable2 > * > tr > td {
+  border:1px solid var(--border-color-base,#a2a9b1);
+  padding:0.2em 0.4em
+}
+.wikitable2 > * > tr > td > p {
+  color: var(--color-progressive);
+  font-style: italic;
+}
+.wikitable2 > * > tr > td > p:hover {
+  color: var(--color-progressive--hover);
+}
+.wikitable2 > * > tr > td > p.has-prefix-super::before {
+	font-style: normal;
 }
 
-/* Table headers and cells */
-.wikitable2 th, 
-.wikitable2 td {
-    border: 1px solid #a2a9b1;
-    padding: 0.4em 0.7em;
+.wikitable2 > tr > th,
+.wikitable2 > * > tr > th {
+  background-color:var(--background-color-neutral,#eaecf0);
+  color:var(--color-base,#202122);
+  text-align:center
 }
-
-/* Header specific styling */
-.wikitable2 th {
-    background-color: #eaecf0;
-    text-align: center;
-    font-weight: bold;
-}
-
-/* Optional: Caption styling if you use <caption> */
-.wikitable2 caption {
-    font-weight: bold;
-    padding: 0.5em;
+.wikitable2 > caption {
+  font-weight:bold
 }
