@@ -2,194 +2,32 @@
 	--highlight-color: lightblue;
 }
 
+/* Tablet / Touch / Stylus hit area: 28px wide for effortless finger grabs */
+@media (pointer: coarse) {
+  .resizer::before {
+    inset: 0 -12px;
+  }
+
+  /* Subtle center pill indicator so tablet users immediately see it's draggable */
+  .resizer::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 32px;
+    border-radius: 999px;
+    background-color: #94a3b8;
+  }
+}
+
 /* From Wikipédia */
 @media screen {
-  :root, .skin-invert, .notheme {
-    --color-base: #202122;
-    --color-base-fixed: #202122;
-    --color-base--hover: #404244;
-    --color-emphasized: #101418;
-    --color-neutral: #404244;
-    --color-subtle: #54595d;
-    --color-placeholder: #72777d;
-    --color-disabled: #a2a9b1;
-    --color-disabled-emphasized: #a2a9b1;
-    --color-inverted: #fff;
-    --color-inverted-fixed: #fff;
-    --color-progressive: #36c;
-    --color-progressive--hover: #3056a9;
-    --color-progressive--active: #233566;
-    --color-progressive--focus: #36c;
-    --color-destructive: #bf3c2c;
-    --color-destructive--hover: #9f3526;
-    --color-destructive--active: #612419;
-    --color-destructive--focus: #36c;
-    --color-visited: #6a60b0;
-    --color-visited--hover: #534fa3;
-    --color-visited--active: #353262;
-    --color-destructive--visited: #9f5555;
-    --color-destructive--visited--hover: #854848;
-    --color-destructive--visited--active: #512e2e;
-    --color-error: #bf3c2c;
-    --color-error--hover: #9f3526;
-    --color-error--active: #612419;
-    --color-warning: #886425;
-    --color-success: #177860;
-    --color-notice: #404244;
-    --color-icon-error: #f54739;
-    --color-icon-warning: #ab7f2a;
-    --color-icon-success: #099979;
-    --color-icon-notice: #72777d;
-    --color-icon-progressive: #36c;
-    --color-content-added: #006400;
-    --color-content-removed: #8b0000;
-    --color-option-red: #bf3c2c;
-    --color-option-orange: #a95226;
-    --color-option-yellow: #886425;
-    --color-option-lime: #1f7a39;
-    --color-option-green: #177860;
-    --color-option-blue: #36c;
-    --color-option-purple: #6a60b0;
-    --color-option-pink: #9b527f;
-    --color-option-maroon: #9f5555;
-    --filter-invert-icon: 0;
-    --filter-invert-primary-button-icon: 1;
-    --box-shadow-color-base: #a2a9b1;
-    --box-shadow-color-progressive--active: #233566;
-    --box-shadow-color-progressive--focus: #36c;
-    --box-shadow-color-progressive-selected: #36c;
-    --box-shadow-color-progressive-selected--hover: #3056a9;
-    --box-shadow-color-progressive-selected--active: #233566;
-    --box-shadow-color-destructive--focus: #36c;
-    --box-shadow-color-inverted: #fff;
-    --box-shadow-color-alpha-base: rgba(0,0,0,0.06);
-    --box-shadow-color-transparent: transparent;
-    --mix-blend-mode-base: normal;
-    --mix-blend-mode-blend: multiply;
-    --background-color-base: #fff;
-    --background-color-base-fixed: #fff;
-    --background-color-neutral: #eaecf0;
-    --background-color-neutral-subtle: #f8f9fa;
-    --background-color-interactive: #eaecf0;
-    --background-color-interactive--hover: #dadde3;
-    --background-color-interactive--active: #c8ccd1;
-    --background-color-interactive-subtle: #f8f9fa;
-    --background-color-interactive-subtle--hover: #eaecf0;
-    --background-color-interactive-subtle--active: #dadde3;
-    --background-color-disabled: #dadde3;
-    --background-color-disabled-subtle: #eaecf0;
-    --background-color-inverted: #101418;
-    --background-color-progressive: #36c;
-    --background-color-progressive--hover: #3056a9;
-    --background-color-progressive--active: #233566;
-    --background-color-progressive--focus: #36c;
-    --background-color-progressive-subtle: #e8eeff;
-    --background-color-progressive-subtle--hover: #d9e2ff;
-    --background-color-progressive-subtle--active: #b6d4fb;
-    --background-color-destructive: #bf3c2c;
-    --background-color-destructive--hover: #9f3526;
-    --background-color-destructive--active: #612419;
-    --background-color-destructive--focus: #36c;
-    --background-color-destructive-subtle: #ffe9e5;
-    --background-color-destructive-subtle--hover: #ffdad3;
-    --background-color-destructive-subtle--active: #ffc8bd;
-    --background-color-error: #f54739;
-    --background-color-error--hover: #d74032;
-    --background-color-error--active: #bf3c2c;
-    --background-color-error-subtle: #ffe9e5;
-    --background-color-error-subtle--hover: #ffdad3;
-    --background-color-error-subtle--active: #ffc8bd;
-    --background-color-warning-subtle: #fdf2d5;
-    --background-color-success-subtle: #dff2eb;
-    --background-color-notice-subtle: #eaecf0;
-    --background-color-content-added: #a3d3ff;
-    --background-color-content-removed: #ffe49c;
-    --background-color-target-text: #ffead4;
-    --background-color-option-red: #ffe9e5;
-    --background-color-option-orange: #ffead4;
-    --background-color-option-yellow: #fdf2d5;
-    --background-color-option-lime: #e3f2e4;
-    --background-color-option-green: #dff2eb;
-    --background-color-option-blue: #e8eeff;
-    --background-color-option-purple: #f0ecf6;
-    --background-color-option-pink: #f5ebf2;
-    --background-color-option-maroon: #f6ebeb;
-    --background-color-transparent: transparent;
-    --background-color-backdrop-light: rgba(255,255,255,0.65);
-    --background-color-backdrop-dark: rgba(0,0,0,0.65);
-    --background-color-button-quiet--hover: rgba(0,24,73,0.027);
-    --background-color-button-quiet--active: rgba(0,24,73,0.082);
-    --background-color-input-binary--checked: #36c;
-    --background-color-tab-list-item-framed--hover: rgba(255,255,255,0.3);
-    --background-color-tab-list-item-framed--active: rgba(255,255,255,0.65);
-    --opacity-icon-base: 0.87;
-    --opacity-icon-base--hover: 0.74;
-    --opacity-icon-base--selected: 1;
-    --opacity-icon-base--disabled: 0.51;
-    --opacity-icon-placeholder: 0.51;
-    --opacity-icon-subtle: 0.67;
-    --border-color-base: #a2a9b1;
-    --border-color-emphasized: #202122;
-    --border-color-subtle: #c8ccd1;
-    --border-color-muted: #dadde3;
-    --border-color-interactive: #72777d;
-    --border-color-interactive--hover: #27292d;
-    --border-color-interactive--active: #202122;
-    --border-color-disabled: #c8ccd1;
-    --border-color-inverted: #fff;
-    --border-color-inverted-fixed: #fff;
-    --border-color-progressive: #36c;
-    --border-color-progressive--hover: #3056a9;
-    --border-color-progressive--active: #233566;
-    --border-color-progressive--focus: #36c;
-    --border-color-destructive: #f54739;
-    --border-color-destructive--hover: #9f3526;
-    --border-color-destructive--active: #612419;
-    --border-color-destructive--focus: #36c;
-    --border-color-error: #f54739;
-    --border-color-error--hover: #9f3526;
-    --border-color-error--active: #612419;
-    --border-color-warning: #ab7f2a;
-    --border-color-warning--hover: #735421;
-    --border-color-warning--active: #453217;
-    --border-color-success: #099979;
-    --border-color-notice: #72777d;
-    --border-color-content-added: #a3d3ff;
-    --border-color-content-removed: #ffe49c;
-    --border-color-option-red: #f54739;
-    --border-color-option-orange: #d46926;
-    --border-color-option-yellow: #ab7f2a;
-    --border-color-option-lime: #259948;
-    --border-color-option-green: #099979;
-    --border-color-option-blue: #6485d1;
-    --border-color-option-purple: #8d7ebd;
-    --border-color-option-pink: #b5739e;
-    --border-color-option-maroon: #b57775;
-    --border-color-transparent: transparent;
-    --border-color-divider: #a2a9b1;
-    --outline-color-progressive--focus: #36c;
-    --color-link: var(--color-progressive);
-    --color-link--hover: var(--color-progressive--hover);
-    --color-link--active: var(--color-progressive--active);
-    --color-link--focus: var(--color-progressive--focus);
-    --color-link--visited: var(--color-visited);
-    --color-link--visited--hover: var(--color-visited--hover);
-    --color-link--visited--active: var(--color-visited--active);
-    --color-link-red: var(--color-destructive);
-    --color-link-red--hover: var(--color-destructive--hover);
-    --color-link-red--active: var(--color-destructive--active);
-    --color-link-red--focus: var(--color-destructive--focus);
-    --color-link-red--visited: var(--color-destructive--visited);
-    --color-link-red--visited--hover: var(--color-destructive--visited--hover);
-    --color-link-red--visited--active: var(--color-destructive--visited--active);
-    --accent-color-base: #36c;
-    --border-color-input--hover: var(--border-color-interactive);
-    --border-color-input-binary: var(--border-color-interactive);
-    --border-color-input-binary--hover: var(--border-color-progressive--hover);
-    --border-color-input-binary--active: var(--border-color-progressive--active);
-    --border-color-input-binary--focus: var(--border-color-progressive--focus);
-    --border-color-input-binary--checked: var(--border-color-progressive);
-    --color-base--subtle: #54595d;
+  a:where(:not([role="button"])) {
+    border-radius: 2px;
+    color: var(--color-progressive);
+    text-decoration: none;
   }
 
   h2 {
@@ -213,19 +51,329 @@
 }
 
 /* From Wikipédia */
-:root {
-  --image-size-small: 180px;
-  --image-size-standard: 250px;
-  --image-size-large: 400px;
-  --image-size-user: var(--image-size-standard);
+@media screen and (prefers-color-scheme: dark) {
+  html {
+    color-scheme: light dark;
+    --background-color-backdrop-dark: rgba(255,255,255,0.65);
+    --background-color-backdrop-light: rgba(0,0,0,0.65);
+    --background-color-base: #101418;
+    --background-color-content-added: #233566;
+    --background-color-content-removed: #453217;
+    --background-color-destructive--focus: #6485d1;
+    --background-color-destructive-subtle--active: #9f3526;
+    --background-color-destructive-subtle--hover: #612419;
+    --background-color-destructive-subtle: #3c1a13;
+    --background-color-disabled-subtle: #27292d;
+    --background-color-disabled: #404244;
+    --background-color-error-subtle--active: #9f3526;
+    --background-color-error-subtle--hover: #612419;
+    --background-color-error-subtle: #3c1a13;
+    --background-color-interactive--active: #54595d;
+    --background-color-interactive--hover: #404244;
+    --background-color-interactive-subtle--active: #404244;
+    --background-color-interactive-subtle--hover: #27292d;
+    --background-color-interactive-subtle: #202122;
+    --background-color-interactive: #27292d;
+    --background-color-inverted: #f8f9fa;
+    --background-color-neutral-subtle: #202122;
+    --background-color-neutral: #27292d;
+    --background-color-notice-subtle: #27292d;
+    --background-color-option-blue: #233566;
+    --background-color-option-green: #153d31;
+    --background-color-option-lime: #183f20;
+    --background-color-option-maroon: #512e2e;
+    --background-color-option-orange: #572c19;
+    --background-color-option-pink: #4e2c40;
+    --background-color-option-purple: #353262;
+    --background-color-option-red: #612419;
+    --background-color-option-yellow: #453217;
+    --background-color-progressive--focus: #6485d1;
+    --background-color-progressive-subtle--active: #3056a9;
+    --background-color-progressive-subtle--hover: #233566;
+    --background-color-progressive-subtle: #1b223d;
+    --background-color-success-subtle: #132821;
+    --background-color-target-text: #572c19;
+    --background-color-warning-subtle: #2d2212;
+    --border-color-base: #72777d;
+    --border-color-content-added: #233566;
+    --border-color-content-removed: #987027;
+    --border-color-destructive--active: #fea898;
+    --border-color-destructive--focus: #6485d1;
+    --border-color-destructive--hover: #fd7865;
+    --border-color-disabled: #54595d;
+    --border-color-emphasized: #eaecf0;
+    --border-color-error--active: #fea898;
+    --border-color-error--hover: #fd7865;
+    --border-color-interactive--active: #c8ccd1;
+    --border-color-interactive--hover: #a2a9b1;
+    --border-color-inverted: #101418;
+    --border-color-muted: #404244;
+    --border-color-progressive--active: #a6bbf5;
+    --border-color-progressive--focus: #6485d1;
+    --border-color-progressive--hover: #88a3e8;
+    --border-color-progressive: #6485d1;
+    --border-color-subtle: #54595d;
+    --border-color-warning--active: #edb537;
+    --border-color-warning--hover: #ca982e;
+    --box-shadow-color-alpha-base: rgba(0,0,0,0.87);
+    --box-shadow-color-base: #72777d;
+    --box-shadow-color-destructive--focus: #6485d1;
+    --box-shadow-color-inverted: #000;
+    --box-shadow-color-progressive--focus: #6485d1;
+    --box-shadow-color-progressive-selected--active: #b6d4fb;
+    --box-shadow-color-progressive-selected--hover: #a6bbf5;
+    --box-shadow-color-progressive-selected: #88a3e8;
+    --color-base--hover: #f8f9fa;
+    --color-base--subtle: #a2a9b1;
+    --color-base: #eaecf0;
+    --color-content-added: #80cdb3;
+    --color-content-removed: #fd7865;
+    --color-destructive--active: #ffc8bd;
+    --color-destructive--hover: #fea898;
+    --color-destructive--visited--active: #e8cecd;
+    --color-destructive--visited--hover: #dcb5b3;
+    --color-destructive--visited: #c99391;
+    --color-destructive: #fd7865;
+    --color-disabled-emphasized: #72777d;
+    --color-disabled: #54595d;
+    --color-emphasized: #f8f9fa;
+    --color-error--active: #ffc8bd;
+    --color-error--hover: #fea898;
+    --color-error: #fd7865;
+    --color-icon-progressive: #6485d1;
+    --color-inverted: #101418;
+    --color-neutral: #c8ccd1;
+    --color-notice: #a2a9b1;
+    --color-option-blue: #88a3e8;
+    --color-option-green: #2cb491;
+    --color-option-lime: #5db26c;
+    --color-option-maroon: #c99391;
+    --color-option-orange: #f97f26;
+    --color-option-pink: #c690b4;
+    --color-option-purple: #a799cd;
+    --color-option-red: #fd7865;
+    --color-option-yellow: #ca982e;
+    --color-progressive--active: #b6d4fb;
+    --color-progressive--hover: #a6bbf5;
+    --color-progressive: #88a3e8;
+    --color-subtle: #a2a9b1;
+    --color-success: #2cb491;
+    --color-visited--active: #d9d0e9;
+    --color-visited--hover: #c5b9dd;
+    --color-visited: #a799cd;
+    --color-warning: #ca982e;
+    --mix-blend-mode-blend: screen;
+  }
+}
+
+@media screen and (prefers-color-scheme: light) {
+  :root {
+    --accent-color-base: #36c;
+    --background-color-backdrop-dark: rgba(0, 0, 0, 0.65);
+    --background-color-backdrop-light: rgba(255, 255, 255, 0.65);
+    --background-color-base-fixed: #fff;
+    --background-color-base: #fff;
+    --background-color-button-quiet--active: rgba(0, 24, 73, 0.082);
+    --background-color-button-quiet--hover: rgba(0, 24, 73, 0.027);
+    --background-color-content-added: #a3d3ff;
+    --background-color-content-removed: #ffe49c;
+    --background-color-destructive--active: #612419;
+    --background-color-destructive--focus: #36c;
+    --background-color-destructive--hover: #9f3526;
+    --background-color-destructive-subtle--active: #ffc8bd;
+    --background-color-destructive-subtle--hover: #ffdad3;
+    --background-color-destructive-subtle: #ffe9e5;
+    --background-color-destructive: #bf3c2c;
+    --background-color-disabled-subtle: #eaecf0;
+    --background-color-disabled: #dadde3;
+    --background-color-error--active: #bf3c2c;
+    --background-color-error--hover: #d74032;
+    --background-color-error-subtle--active: #ffc8bd;
+    --background-color-error-subtle--hover: #ffdad3;
+    --background-color-error-subtle: #ffe9e5;
+    --background-color-error: #f54739;
+    --background-color-input-binary--checked: #36c;
+    --background-color-interactive--active: #c8ccd1;
+    --background-color-interactive--hover: #dadde3;
+    --background-color-interactive-subtle--active: #dadde3;
+    --background-color-interactive-subtle--hover: #eaecf0;
+    --background-color-interactive-subtle: #f8f9fa;
+    --background-color-interactive: #eaecf0;
+    --background-color-inverted: #101418;
+    --background-color-neutral-subtle: #f8f9fa;
+    --background-color-neutral: #eaecf0;
+    --background-color-notice-subtle: #eaecf0;
+    --background-color-option-blue: #e8eeff;
+    --background-color-option-green: #dff2eb;
+    --background-color-option-lime: #e3f2e4;
+    --background-color-option-maroon: #f6ebeb;
+    --background-color-option-orange: #ffead4;
+    --background-color-option-pink: #f5ebf2;
+    --background-color-option-purple: #f0ecf6;
+    --background-color-option-red: #ffe9e5;
+    --background-color-option-yellow: #fdf2d5;
+    --background-color-progressive--active: #233566;
+    --background-color-progressive--focus: #36c;
+    --background-color-progressive--hover: #3056a9;
+    --background-color-progressive-subtle--active: #b6d4fb;
+    --background-color-progressive-subtle--hover: #d9e2ff;
+    --background-color-progressive-subtle: #e8eeff;
+    --background-color-progressive: #36c;
+    --background-color-success-subtle: #dff2eb;
+    --background-color-tab-list-item-framed--active: rgba(255, 255, 255, 0.65);
+    --background-color-tab-list-item-framed--hover: rgba(255, 255, 255, 0.3);
+    --background-color-target-text: #ffead4;
+    --background-color-transparent: transparent;
+    --background-color-warning-subtle: #fdf2d5;
+    --border-color-base: #a2a9b1;
+    --border-color-content-added: #a3d3ff;
+    --border-color-content-removed: #ffe49c;
+    --border-color-destructive--active: #612419;
+    --border-color-destructive--focus: #36c;
+    --border-color-destructive--hover: #9f3526;
+    --border-color-destructive: #f54739;
+    --border-color-disabled: #c8ccd1;
+    --border-color-divider: #a2a9b1;
+    --border-color-emphasized: #202122;
+    --border-color-error--active: #612419;
+    --border-color-error--hover: #9f3526;
+    --border-color-error: #f54739;
+    --border-color-input--hover: var(--border-color-interactive);
+    --border-color-input-binary--active: var(--border-color-progressive--active);
+    --border-color-input-binary--checked: var(--border-color-progressive);
+    --border-color-input-binary--focus: var(--border-color-progressive--focus);
+    --border-color-input-binary--hover: var(--border-color-progressive--hover);
+    --border-color-input-binary: var(--border-color-interactive);
+    --border-color-interactive--active: #202122;
+    --border-color-interactive--hover: #27292d;
+    --border-color-interactive: #72777d;
+    --border-color-inverted-fixed: #fff;
+    --border-color-inverted: #fff;
+    --border-color-muted: #dadde3;
+    --border-color-notice: #72777d;
+    --border-color-option-blue: #6485d1;
+    --border-color-option-green: #099979;
+    --border-color-option-lime: #259948;
+    --border-color-option-maroon: #b57775;
+    --border-color-option-orange: #d46926;
+    --border-color-option-pink: #b5739e;
+    --border-color-option-purple: #8d7ebd;
+    --border-color-option-red: #f54739;
+    --border-color-option-yellow: #ab7f2a;
+    --border-color-progressive--active: #233566;
+    --border-color-progressive--focus: #36c;
+    --border-color-progressive--hover: #3056a9;
+    --border-color-progressive: #36c;
+    --border-color-subtle: #c8ccd1;
+    --border-color-success: #099979;
+    --border-color-transparent: transparent;
+    --border-color-warning--active: #453217;
+    --border-color-warning--hover: #735421;
+    --border-color-warning: #ab7f2a;
+    --box-shadow-color-alpha-base: rgba(0, 0, 0, 0.06);
+    --box-shadow-color-base: #a2a9b1;
+    --box-shadow-color-destructive--focus: #36c;
+    --box-shadow-color-inverted: #fff;
+    --box-shadow-color-progressive--active: #233566;
+    --box-shadow-color-progressive--focus: #36c;
+    --box-shadow-color-progressive-selected--active: #233566;
+    --box-shadow-color-progressive-selected--hover: #3056a9;
+    --box-shadow-color-progressive-selected: #36c;
+    --box-shadow-color-transparent: transparent;
+    --color-base--hover: #404244;
+    --color-base--subtle: #54595d;
+    --color-base-fixed: #202122;
+    --color-content-added: #006400;
+    --color-content-removed: #8b0000;
+    --color-destructive--active: #612419;
+    --color-destructive--focus: #36c;
+    --color-destructive--hover: #9f3526;
+    --color-destructive--visited--active: #512e2e;
+    --color-destructive--visited--hover: #854848;
+    --color-destructive--visited: #9f5555;
+    --color-destructive: #bf3c2c;
+    --color-disabled-emphasized: #a2a9b1;
+    --color-disabled: #a2a9b1;
+    --color-emphasized: #101418;
+    --color-error--active: #612419;
+    --color-error--hover: #9f3526;
+    --color-error: #bf3c2c;
+    --color-icon-error: #f54739;
+    --color-icon-notice: #72777d;
+    --color-icon-progressive: #36c;
+    --color-icon-success: #099979;
+    --color-icon-warning: #ab7f2a;
+    --color-inverted-fixed: #fff;
+    --color-inverted: #fff;
+    --color-link--active: var(--color-progressive--active);
+    --color-link--focus: var(--color-progressive--focus);
+    --color-link--hover: var(--color-progressive--hover);
+    --color-link--visited--active: var(--color-visited--active);
+    --color-link--visited--hover: var(--color-visited--hover);
+    --color-link--visited: var(--color-visited);
+    --color-link-red--active: var(--color-destructive--active);
+    --color-link-red--focus: var(--color-destructive--focus);
+    --color-link-red--hover: var(--color-destructive--hover);
+    --color-link-red--visited--active: var(--color-destructive--visited--active);
+    --color-link-red--visited--hover: var(--color-destructive--visited--hover);
+    --color-link-red--visited: var(--color-destructive--visited);
+    --color-link-red: var(--color-destructive);
+    --color-link: var(--color-progressive);
+    --color-neutral: #404244;
+    --color-notice: #404244;
+    --color-option-blue: #36c;
+    --color-option-green: #177860;
+    --color-option-lime: #1f7a39;
+    --color-option-maroon: #9f5555;
+    --color-option-orange: #a95226;
+    --color-option-pink: #9b527f;
+    --color-option-purple: #6a60b0;
+    --color-option-red: #bf3c2c;
+    --color-option-yellow: #886425;
+    --color-placeholder: #72777d;
+    --color-progressive--active: #233566;
+    --color-progressive--focus: #36c;
+    --color-progressive--hover: #3056a9;
+    --color-progressive: #36c;
+    --color-subtle: #54595d;
+    --color-success: #177860;
+    --color-visited--active: #353262;
+    --color-visited--hover: #534fa3;
+    --color-visited: #6a60b0;
+    --color-warning: #886425;
+    --filter-invert-icon: 0;
+    --filter-invert-primary-button-icon: 1;
+    --mix-blend-mode-base: normal;
+    --mix-blend-mode-blend: multiply;
+    --opacity-icon-base--disabled: 0.51;
+    --opacity-icon-base--hover: 0.74;
+    --opacity-icon-base--selected: 1;
+    --opacity-icon-base: 0.87;
+    --opacity-icon-placeholder: 0.51;
+    --opacity-icon-subtle: 0.67;
+    --outline-color-progressive--focus: #36c;
+    --color-base: #202122;
+  }
 }
 
 body {
 	display: flex;
+  background-color: var(--background-color-neutral-subtle);
+  color: var(--color-base);
 	flex-flow: column;
   font-family: sans-serif;
 	height: 100vh;
 	margin: 0px;
+
+}
+
+/* Prevent text selection & iframe pointer traps while dragging */
+body.is-resizing {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+body.is-resizing iframe {
+  pointer-events: none;
 }
 
 rt {
@@ -264,8 +412,8 @@ ruby[data-dessous] {
 
 #ribbon {
 	display: flex;
-	background-color: lightgray;
-	color: black;
+	background-color: var(--background-color-base);
+	color: var(--color-base);
 	flex-wrap: wrap;
 }
 
@@ -293,27 +441,22 @@ background-image: url(./webp/us-ca.webp);
 /* For use with images */
 
 .dock-btn {
-  /* Target size & layout */
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  
-  /* Typography & cross-OS symbol fallbacks */
-  font-family: "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols", "Noto Sans Symbols 2", "DejaVu Sans", sans-serif;
-  font-size: 16px;
-  line-height: 1;
-  
-  /* Clean button reset & UX */
   background: transparent;
-  color: currentColor;
   border: 1px solid transparent;
   border-radius: 6px;
+  color: currentColor;
   cursor: pointer;
-  user-select: none;
+  font-family: "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols", "Noto Sans Symbols 2", "DejaVu Sans", sans-serif;
+  font-size: 16px;
+  height: 32px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
   transition: var(--background-color-base) 0.15s ease, color 0.15s ease;
+  user-select: none;
+  width: 32px;
 }
 
 .dock-btn:hover {
@@ -323,8 +466,8 @@ background-image: url(./webp/us-ca.webp);
 .dock-btn[aria-pressed="true"],
 .dock-btn.is-active {
   background-color: rgba(59, 130, 246, 0.15);
-  color: #2563eb;
   border-color: rgba(59, 130, 246, 0.3);
+  color: #2563eb;
 }
 
 /* Optional: Optical vertical nudge if a specific OS font renders APL glyphs slightly low */
@@ -399,6 +542,65 @@ background-image: url(./webp/us-ca.webp);
 	display: none;
 }
 
+.split-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.left-panel {
+  /* Initial width; controlled dynamically via JS */
+  width: 260px;
+  min-width: 150px;
+  max-width: 600px;
+  flex-shrink: 0;
+  overflow: auto;
+}
+
+.right-panel {
+  flex: 1;
+  min-width: 200px;
+  overflow: auto;
+}
+
+.resizer {
+  position: relative;
+  background-color: #e2e8f0;
+  cursor: col-resize;
+  flex-shrink: 0;
+  touch-action: none;
+  transition: background-color 0.15s ease;
+  user-select: none;
+  width: 4px;
+}
+
+/* Invisible wider grab target (12px total) for better UX */
+.resizer::before {
+  content: "";
+  position: absolute;
+  inset: 0 -4px;
+  z-index: 10;
+}
+
+.resizer:hover,
+.resizer:focus-visible,
+.resizer.is-dragging {
+  background-color: #3b82f6;
+  outline: none;
+}
+
+.resizer:hover,
+.resizer:focus-visible,
+.resizer.is-dragging {
+  background-color: #3b82f6;
+  outline: none;
+}
+
+.resizer:hover::after,
+.resizer.is-dragging::after {
+  background-color: #ffffff;
+}
 
 .use-emoji-flags td:nth-child(1) {
 	text-shadow: black 1px 1px 2px;
@@ -407,11 +609,9 @@ background-image: url(./webp/us-ca.webp);
 
 .wikitable {
   display: block;
-	background-color: #f9f9f9;
 	border: 1px solid #aaaaaa;
 	border-collapse: collapse;
   overflow: auto;
-	/* margin: 1em 0; */
 	width: 100%;
 }
 
@@ -440,11 +640,11 @@ background-image: url(./webp/us-ca.webp);
 }
 
 .wikitable th.sortable {
-    cursor: pointer;
-    padding-right: 21px; /* Make room for the arrow icon */
-    background-image: url("../svg/sort_both.svg");
-    background-repeat: no-repeat;
-    background-position: right 4px center;
+  cursor: pointer;
+  padding-right: 21px; /* Make room for the arrow icon */
+  background-image: url("../svg/sort_both.svg");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
 }
 
 .wikitable td {
@@ -459,7 +659,7 @@ background-image: url(./webp/us-ca.webp);
 
 .wikitable > tbody > tr > td:nth-child(2) {
 	font-style: italic;
-	color: blue;
+	color: var(--color-progressive);
 }
 
 .wikitable > tbody > tr.highlighted {
@@ -468,7 +668,7 @@ background-image: url(./webp/us-ca.webp);
 
 /* Styling for the [1] links */
 .wikitable *.citation-link {
-	color: #36b;
+	color: var(--color-progressive);
 	text-decoration: none;
 	font-size: 0.8em;
 	vertical-align: super;

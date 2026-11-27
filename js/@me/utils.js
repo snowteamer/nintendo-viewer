@@ -31,12 +31,35 @@ export const createButton = (/**@type ButtonProps */ props = {}, /**@type Elemen
   return rv
 }
 
+/**
+ * Sets `this: HTMLButtonElement` AND narrows `ev.currentTarget` to `HTMLButtonElement`
+ * so you can write clean method shorthand (`onclick(e) { this.textContent = ... }`).
+ *
+ * @typedef {{
+ *   [K in keyof HTMLDivElement as K extends `on${string}` ? K : never]?:
+ *     HTMLDivElement[K] extends ((this: any, ev: infer E) => infer R) | null
+ *       ? ((this: HTMLDivElement, ev: E & { readonly currentTarget: HTMLDivElement }) => R) | null
+ *       : never;
+ * }} DivEvents
+ *
+ * @typedef {Omit<Partial<HTMLButtonElement>, keyof DivEvents> & DivEvents} DivProps
+ */
+
 export const createCheckbox = (/**@type Partial<HTMLInputElement> */ props = {}) => {
   const rv = document.createElement("input")
   Object.assign(rv,    
     { type: "checkbox" },
     props,
   )
+  return rv
+}
+
+export const createDiv = (/**@type DivProps */ props = {}, /**@type ElementOptions */ options = {}) => {
+  const rv = document.createElement("div")
+  Object.assign(rv, props)
+
+  const { dataset } = options
+  if (dataset) for (const key of Object.keys(dataset)) rv.dataset[key] = dataset[key]
   return rv
 }
 
