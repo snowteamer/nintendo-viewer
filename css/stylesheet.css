@@ -255,6 +255,10 @@ ruby[data-dessous] {
 }
 
 #main {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  flex-wrap: nowrap;
 	overflow: auto;
 }
 
@@ -272,6 +276,7 @@ ruby[data-dessous] {
 }
 
 #section-list {
+  display: none;
   overflow: auto;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
@@ -286,6 +291,47 @@ background-image: url(./webp/us-ca.webp);
 */
 
 /* For use with images */
+
+.dock-btn {
+  /* Target size & layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  
+  /* Typography & cross-OS symbol fallbacks */
+  font-family: "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols", "Noto Sans Symbols 2", "DejaVu Sans", sans-serif;
+  font-size: 16px;
+  line-height: 1;
+  
+  /* Clean button reset & UX */
+  background: transparent;
+  color: currentColor;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: var(--background-color-base) 0.15s ease, color 0.15s ease;
+}
+
+.dock-btn:hover {
+  background-color: rgba(128, 128, 128, 0.15);
+}
+
+.dock-btn[aria-pressed="true"],
+.dock-btn.is-active {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Optional: Optical vertical nudge if a specific OS font renders APL glyphs slightly low */
+.dock-btn .glyph {
+  display: block;
+  transform: translateY(-0.5px);
+}
 
 .has-prefix-image::before {
 	content: '';
@@ -360,9 +406,11 @@ background-image: url(./webp/us-ca.webp);
 }
 
 .wikitable {
+  display: block;
 	background-color: #f9f9f9;
 	border: 1px solid #aaaaaa;
 	border-collapse: collapse;
+  overflow: auto;
 	/* margin: 1em 0; */
 	width: 100%;
 }

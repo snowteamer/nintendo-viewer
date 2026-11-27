@@ -1,10 +1,12 @@
-import { colgroup, tb, tBody, tHead } from "@me/dom.js"
-import { createCheckbox, createLabelForCheckbox, throwNewError } from "@me/utils.js"
+import { colgroup, ribbon, sectionList, tb, tBody, tHead } from "@me/dom.js"
+import { createButton, createCheckbox, createLabelForCheckbox, throwNewError } from "@me/utils.js"
 import Column from "@me/Column.js"
+import Row from "@me/Row.js"
 import Game from "@me/Game.js"
 import ReferenceTooltip from "@me/ReferenceTooltip.js"
 import Region from "@me/Region.js"
 import { throwNewAssertionError } from "@me/tc.js"
+import Wikitable from "@me/Wikitable.js";
 
 function setPrefixImage (/**@type HTMLElement */ element, /**@type string */ cssImageValue) {
   if (cssImageValue === "") {
@@ -59,7 +61,6 @@ export default class UI {
   /**@type UI? */
   static instance = null
 
-
   /**@type Record<keyof UI["_options"], (this: UI, arg: boolean) => void> */
   static optionHandlers = {
     alignCenter (bool) {
@@ -76,16 +77,16 @@ export default class UI {
     },
     useRegionalPrefixes (bool) {
       const ui = this
-      const index = this.columns.findIndex(c => c.propertyKey === "title")
+      const index = this.columns.findIndex(c => c.propertyKey === "fullTitle")
       if (bool) {
         ui.hideColumnByName("Région")
-        for (const game of Game.instances) {
-          setPrefixSuper(game.row.cells[index], game.region)
+        for (const row of ui.rows) {
+          setPrefixSuper(row.tr.cells[index], row.game.region)
         }
       } else {
         ui.showColumnByName("Région")
-        for (const game of Game.instances) {
-          unsetPrefixSuper(game.row.cells[index])
+        for (const row of ui.rows) {
+          unsetPrefixSuper(row.tr.cells[index])
         }
       }
     }
@@ -150,6 +151,11 @@ export default class UI {
     && (this.selectedConsoleName === "" || game.console === this.selectedConsoleName)
   )
 
+  /**@type Row[] */
+  rows = []
+  /**@type Map<Game, Row> */
+  rowsByGame = new Map()
+
   rt = new ReferenceTooltip()
 
   selectedConsoleName = ""
@@ -164,11 +170,29 @@ export default class UI {
       async onchange () {
         const file = ui.filePicker.files?.[0]
         if (!file) return
-        Game.instances.length = 0
+        Game.unload()
         await Game.loadFile(file)
-        ui.updateColumns()
         ui.initRows()
+        ui.updateColumns()
         ui.updateConsoles()
+      }
+    })
+
+    this.btnDock = createButton({
+      id: "btnDock",
+      className: "btnDock",
+      onclick () {
+        const { docking: oldDocking } = this.dataset
+        const newDocking = this.dataset.docking = oldDocking === "top" ? "bottom" : "top"
+        ribbon.style.order = newDocking === "top" ? "0" : "2"
+        this.textContent = newDocking === "top" ? "⍗" : "⍐" 
+        this.title = `Ancrer en ${newDocking === "top" ? "bas": "haut"}`
+      },
+      textContent: "⍗",
+      title: "Ancrer en bas"
+    }, {
+      dataset: {
+        docking: "top"
       }
     })
 
@@ -215,8 +239,8 @@ export default class UI {
 
     this.cbUseSpypiledMode = createCheckbox({
       onchange () {
-        ;/**@type HTMLInputElement */ (this).checked ? showSections() : hideSections()
-        ;/**@type HTMLInputElement */ (this).checked ? tb.style.display = "none" : tb.style.display = ""
+        ;/**@type HTMLInputElement */ (this).checked ? ui.showSections() : ui.hideSections()
+        //;/**@type HTMLInputElement */ (this).checked ? tb.style.display = "none" : tb.style.display = ""
       },
       textContent: "Une wikitable par console",
       title: "Afficher une wikitable par console distincte"
@@ -316,16 +340,25 @@ export default class UI {
     if (index > -1) tb.classList.add(`hide-col-${index + 1}`)
   }
 
+  hideSections () {
+    sectionList.style.display = "none"
+  }
+
   initRows () {
-    tBody.textContent = ""
-    for (const game of Game.instances) tBody.appendChild(game.row)
+    tBody.replaceChildren()
+    for (const game of Game.instances) {
+      const row = new Row(game)
+      this.rows.push(row)
+      this.rowsByGame.set(game, row)
+      tBody.appendChild(row.tr)
+    }
     this.updateCounter(Game.instances.length)
   }
 
   reset () {
     for (const region of Region.instances) region.checkbox.checked = true
     this.seConsole.selectedIndex = 0
-    for (const game of Game.instances) game.row.style.display = ""
+    for (const row of this.rows) row.hide()
     this.updateCounter(Game.instances.length)
   }
 
@@ -335,20 +368,6 @@ export default class UI {
     } catch (err) {
       console.warn(err)
     }
-  }
-
-  sortGames (/**@type NonNullable<Parameters<Array<Game>["sort"]>[0]> */ comparator) {
-    Game.instances.sort(comparator)
-    tBody.textContent = ""
-    for (const game of Game.instances) tBody.appendChild(game.row)
-  }
-
-  sortGamesByProperty (/**@type keyof Game */ propertyKey, reverseOrder = false) {
-    this.sortGames(
-      reverseOrder
-      ? (a, b) => -String(a[propertyKey]).localeCompare(String(b[propertyKey]))
-      : (a, b) => String(a[propertyKey]).localeCompare(String(b[propertyKey]))
-    )
   }
 
   showColumnByIndex (/**@type number */ index) {
@@ -361,6 +380,30 @@ export default class UI {
     if (index > -1) tb.classList.remove(`hide-col-${index + 1}`)
   }
 
+  showSections () {
+    for (const consoleName of this.consoleNames) {
+      const wt = new Wikitable(consoleName, (/**@type RawGameEntry */ rge) => rge.consoleID === consoleName)
+      sectionList.appendChild(wt.table)
+      wt.update()
+    }
+    sectionList.style.display = "initial"
+  }
+
+  sortGames (/**@type NonNullable<Parameters<Array<Game>["sort"]>[0]> */ comparator) {
+    const { rows } = this
+    tBody.replaceChildren()
+    rows.sort((row, otherRow) => comparator(row.game, otherRow.game))
+    for (const row of rows) tBody.appendChild(row.tr)
+  }
+
+  sortGamesByProperty (/**@type keyof Game */ propertyKey, reverseOrder = false) {
+    this.sortGames(
+      reverseOrder
+      ? (a, b) => -String(a[propertyKey]).localeCompare(String(b[propertyKey]))
+      : (a, b) => String(a[propertyKey]).localeCompare(String(b[propertyKey]))
+    )
+  }
+
   unload () {
     Game.unload()
     tBody.textContent = ""
@@ -369,11 +412,20 @@ export default class UI {
     this.filePicker.value = ""
   }
 
+  updateAllRows () {
+    for (const row of this.rows) row.update()
+  }
+
   updateColumns () {
     const gamePropertyKeys = this.columns.map(c => c.propertyKey)
-    try { Game.updateColumns(gamePropertyKeys) } catch (err) { console.error(err.message) }
+    try {
+      Game.validatePropertyKeys(gamePropertyKeys)
+    } catch (err) {
+      console.error(err.message)
+    }
     const tr = tHead.querySelector("tr") ?? tHead.insertRow()
     tr.textContent = ""
+    colgroup.replaceChildren()
     for (const column of this.columns) {
       const { col, th } = column
       colgroup.appendChild(col)
@@ -407,16 +459,17 @@ export default class UI {
   }
 
   updatePredicate () {
-    let numVisibleRows = 0
+    const { rowsByGame } = this
+    let numVisibleGames = 0
     for (const game of Game.instances) {
       if (this.predicate(game)) {
-        numVisibleRows++
-        game.row.style.display = ""
+        numVisibleGames++
+        rowsByGame.get(game)?.show()
       } else {
-        game.row.style.display = "none"
+        rowsByGame.get(game)?.hide()
       }
     }
-    this.updateCounter(numVisibleRows)
+    this.updateCounter(numVisibleGames)
   }
 
   useCustomDateFormat () {
@@ -424,7 +477,8 @@ export default class UI {
     if (columnIndex < 0) return
     const months = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
     let datestring = ""
-    for (const game of Game.instances) {
+    for (const row of this.rows) {
+      const { game, tr } = row
       const { releaseDate } = game
       if (releaseDate === "TBA") datestring = "TBA"
       else {
@@ -433,7 +487,7 @@ export default class UI {
         else if (year && month) datestring = `${months[Number(month) - 1]}-${year}`
         else datestring = year
       }
-      game.row.cells[columnIndex].textContent = datestring
+      tr.cells[columnIndex].textContent = datestring
     }
   }
 
@@ -441,10 +495,11 @@ export default class UI {
     const columnIndex = this.columns.findIndex(c => c.propertyKey === "region")
     if (columnIndex < 0) return
     tBody.classList.add("use-emoji-flags")
-    for (const game of Game.instances) {
+    for (const row of this.rows) {
+      const { game, tr } = row
       const { region: code } = game
       const region = Region.byCode(code)
-      const cell = game.row.cells[columnIndex]
+      const cell = tr.cells[columnIndex]
       if (region.useImage) {
         setPrefixImage(cell, `url(../webp/${region.code}.webp)`)
         cell.textContent = ""
@@ -463,8 +518,8 @@ export default class UI {
   useIsoDateFormat () {
     const columnIndex = this.columns.findIndex(c => c.propertyKey === "releaseDate")
     if (columnIndex < 0) return
-    for (const game of Game.instances) {
-      game.row.cells[columnIndex].textContent = game.releaseDate
+    for (const row of this.rows) {
+      row.tr.cells[columnIndex].textContent = row.game.releaseDate
     }
   }
 
@@ -472,9 +527,9 @@ export default class UI {
     const columnIndex = this.columns.findIndex(c => c.propertyKey === "region")
     if (columnIndex < 0) return
     tBody.classList.remove("use-emoji-flags")
-    for (const game of Game.instances) {
-      const cell = game.row.cells[columnIndex]
-      cell.textContent = game.region
+    for (const row of this.rows) {
+      const cell = row.tr.cells[columnIndex]
+      cell.textContent = row.game.region
       setPrefixImage(cell, "")
     }
     for (const region of Region.instances) {

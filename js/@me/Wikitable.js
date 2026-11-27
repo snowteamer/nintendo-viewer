@@ -62,7 +62,7 @@ export default class Wikitable {
     update () {
         const { captionText, predicate } = this
         this.table.createCaption().textContent = this.captionText
-        this.tBody.textContent = ""
+        this.tBody.replaceChildren()
         for (const rawGameEntry of Game.rawEntries) {
             if (!predicate(rawGameEntry)) continue
             /**@ts-ignore */

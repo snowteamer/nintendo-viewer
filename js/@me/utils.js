@@ -1,5 +1,36 @@
 import * as tc from "@me/tc.js";
 
+/**
+ * @typedef {{
+ *   type?: 'button' | 'submit' | 'reset';
+ *   ariaPressed?: 'true' | 'false' | 'mixed' | null;
+ *   ariaExpanded?: 'true' | 'false' | null;
+ * }} ButtonLiterals
+ */
+
+/**
+ * Sets `this: HTMLButtonElement` AND narrows `ev.currentTarget` to `HTMLButtonElement`
+ * so you can write clean method shorthand (`onclick(e) { this.textContent = ... }`).
+ *
+ * @typedef {{
+ *   [K in keyof HTMLButtonElement as K extends `on${string}` ? K : never]?:
+ *     HTMLButtonElement[K] extends ((this: any, ev: infer E) => infer R) | null
+ *       ? ((this: HTMLButtonElement, ev: E & { readonly currentTarget: HTMLButtonElement }) => R) | null
+ *       : never;
+ * }} ButtonEvents
+ *
+ * @typedef {Omit<Partial<HTMLButtonElement>, keyof ButtonEvents> & ButtonEvents} ButtonProps
+ */
+
+export const createButton = (/**@type ButtonProps */ props = {}, /**@type ElementOptions */ options = {}) => {
+  const rv = document.createElement("button")
+  Object.assign(rv, props)
+
+  const { dataset } = options
+  if (dataset) for (const key of Object.keys(dataset)) rv.dataset[key] = dataset[key]
+  return rv
+}
+
 export const createCheckbox = (/**@type Partial<HTMLInputElement> */ props = {}) => {
   const rv = document.createElement("input")
   Object.assign(rv,    

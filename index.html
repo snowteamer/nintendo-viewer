@@ -12,8 +12,8 @@
       <table id="sheet" class="wikitable">
         <colgroup id="colgroup"></colgroup>
       </table>
+      <div id="section-list"></div>
     </div>
-    <div id="section-list"></div>
     <div id="footer"></div>
   </body>
   <script type="importmap">
@@ -43,19 +43,6 @@
       return await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`).then(r => r.json())
     }
 
-    function hideSections () {
-      dom.sectionList.style.display = "none"
-    }
-
-    function showSections () {
-      for (const consoleName of ui.consoleNames) {
-        const wt = new Wikitable(consoleName, (/**@type RawGameEntry */ rge) => rge.consoleID === consoleName)
-        dom.sectionList.appendChild(wt.table)
-        wt.update(consoleName)
-      }
-      dom.sectionList.style.display = ""
-    }
-
     ;(async () => {
       /* Asynchronous imports */
       window.dom = await import("@me/dom.js")
@@ -72,6 +59,7 @@
       Object.assign(window, { regions: Region.instances }, utils)
       /* Ribbon initialization */
       dom.ribbon.append(
+        ui.btnDock,
         ui.filePicker,
         ui.spCounter,
         ...regions.map(r => r.label),

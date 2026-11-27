@@ -7,6 +7,10 @@ As soon as you add an export, TypeScript treats it as a module, and the global t
 type completionStatus = (0 | 1 | 2)
 type isostring = string // ISO 8601 string, possibly truncated to month or day precision. */
 
+type ElementOptions = {
+    dataset?: Record<string, string>;
+}
+
 type Game = import("./Game.js").default
 
 type GamePropertyKey = keyof Game
